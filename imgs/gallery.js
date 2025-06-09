@@ -168,4 +168,4 @@ async function loadPortfolio() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadPortfolio);
+document.addEventListener("DOMContentLoaded", loadPortfolio());

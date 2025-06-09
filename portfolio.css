@@ -1,10 +1,28 @@
 .gallery {
-  padding: 5px;
   border-radius: var(--radius);
   border: 2px solid rgba(255, 255, 255, 0.07);
   padding: var(--padding);
   margin: var(--padding) 0;
+  width: 100%;
+  height: max-content;
   overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap);
+}
+.gallery .image {
+  display: flex;
+  position: relative;
+  flex: 1 1 33%;
+
+  min-width: 250px;
+  max-width: 100%;
+}
+@media (min-width: 700px) {
+  .gallery .image {
+    max-width: 50%;
+  }
 }
 .design-portfolio {
   height: 50vh;
@@ -32,15 +50,6 @@
   margin: 0 auto;
 }
 .gallery .image {
-  position: relative;
-  cursor: pointer;
-  overflow: hidden;
-  display: flex;
-  flex: 1;
-  max-width: 50%;
-  justify-content: center;
-  transition: 0.3s;
-  align-items: center;
 }
 .gallery .image:hover img {
 }
@@ -156,17 +165,4 @@
 }
 .gallery .image:hover .new-badge {
   opacity: 1;
-}
-.gallery .image {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  min-width: 200px;
-  justify-content: flex-end;
-  width: 25%;
-}
-.gallery {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
 }
