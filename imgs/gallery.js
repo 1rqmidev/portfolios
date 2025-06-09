@@ -16,7 +16,6 @@ function getCurrentPortfolioName() {
   return pathParts[pathParts.length - 1].toLowerCase();
 }
 
-console.log(getCurrentPortfolioName);
 function formatRelativeTime(date) {
   const seconds = Math.floor((new Date() - date) / 1000);
 
