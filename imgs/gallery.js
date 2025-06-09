@@ -58,7 +58,8 @@ async function loadPortfolio() {
       console.warn("No portfolio name found in URL path");
       return;
     }
-
+    console.log(currentPage);
+    console.log(currentPage);
     const doc = await firebase
       .firestore()
       .collection("portfolios")
@@ -160,7 +161,9 @@ async function loadPortfolio() {
   } catch (error) {
     console.error("Error loading portfolio:", error);
     const errorDiv = document.createElement("div");
-    errorDiv.textContent = "Failed to load portfolio. Please try again later.";
+    errorDiv.textContent =
+      "Failed to load portfolio. Please try again later." +
+      getCurrentPortfolioName;
     document.body.appendChild(errorDiv);
   }
 }
