@@ -53,7 +53,12 @@ function formatDateForAttribute(date) {
 async function loadPortfolio() {
   try {
     const currentPage = getCurrentPortfolioName();
-    console.log(currentPage + "Currpage");
+
+    if (!currentPage) {
+      console.warn("No portfolio name found in URL path");
+      return;
+    }
+
     const doc = await firebase
       .firestore()
       .collection("portfolios")
