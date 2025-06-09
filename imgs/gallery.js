@@ -15,7 +15,7 @@ function getCurrentPortfolioName() {
   // The last directory name is the last element in the path parts array
   return pathParts[pathParts.length - 1].toLowerCase();
 }
-
+console.log(getCurrentPortfolioName());
 function formatRelativeTime(date) {
   const seconds = Math.floor((new Date() - date) / 1000);
 

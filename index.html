@@ -362,9 +362,9 @@
           return response.text();
         })
         .then((views) => {
-          document.getElementById("view-counter").textContent = `${parseInt(
+          document.getElementById("view-counter").textContent = ` ${parseInt(
             views
-          ).toLocaleString()}`;
+          ).toLocaleString()} `;
         })
         .catch((error) => {
           console.error(error);
