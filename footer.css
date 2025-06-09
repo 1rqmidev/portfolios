@@ -76,7 +76,9 @@
   height: 25px;
   object-fit: contain;
 }
-
+.view-counter {
+  padding: 0 5px;
+}
 .visitor-count {
   display: flex;
   gap: 10px;

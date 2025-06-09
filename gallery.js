@@ -9,7 +9,7 @@ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 function getCurrentPortfolioName() {
   const pathParts = window.location.pathname.split("/").filter(Boolean); // removes empty strings
-
+  console.log(pathParts);
   // Look for 'portfolios' in the path and get the part after it
   const portfolioIndex = pathParts.indexOf("portfolios");
   if (portfolioIndex !== -1 && pathParts.length > portfolioIndex + 1) {
