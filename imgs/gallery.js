@@ -53,7 +53,7 @@ function formatDateForAttribute(date) {
 async function loadPortfolio() {
   try {
     const currentPage = getCurrentPortfolioName();
-
+    currentPage = "mc-build-portfolio";
     if (!currentPage) {
       console.warn("No portfolio name found in URL path");
       return;
