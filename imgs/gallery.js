@@ -8,11 +8,12 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 function getCurrentPortfolioName() {
-  return window.location.pathname
+  const pathParts = window.location.pathname
     .split("/")
-    .pop()
-    .replace(".html", "")
-    .toLowerCase();
+    .filter((part) => part.length > 0); // remove empty strings from splitting
+
+  // The last directory name is the last element in the path parts array
+  return pathParts[pathParts.length - 1].toLowerCase();
 }
 
 function formatRelativeTime(date) {
