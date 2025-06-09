@@ -4,8 +4,6 @@ const firebaseConfig = {
   projectId: "my-project-datas-ef021",
 };
 
-
-
 // Initialize Firebase
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
@@ -54,14 +52,17 @@ function formatDateForAttribute(date) {
 
 async function loadPortfolio() {
   try {
-    const currentPage = getCurrentPortfolioName();
-    currentPage = "mc-build-portfolio";
+    let currentPage = getCurrentPortfolioName();
+    // Remove this line as it overrides the detected portfolio name
+    // currentPage = "mc-build-portfolio";
+
     if (!currentPage) {
       console.warn("No portfolio name found in URL path");
       return;
     }
-    console.log(currentPage);
-    console.log(currentPage);
+
+    console.log("Loading portfolio:", currentPage);
+
     const doc = await firebase
       .firestore()
       .collection("portfolios")
@@ -81,7 +82,7 @@ async function loadPortfolio() {
     const heading = document.querySelector(".portfolio-name");
     heading.textContent =
       portfolioData.displayName
-        .split("-")
+        ?.split("-")
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(" ") ||
       currentPage
@@ -163,11 +164,10 @@ async function loadPortfolio() {
   } catch (error) {
     console.error("Error loading portfolio:", error);
     const errorDiv = document.createElement("div");
-    errorDiv.textContent =
-      "Failed to load portfolio. Please try again later." +
-      getCurrentPortfolioName;
+    errorDiv.textContent = "Failed to load portfolio. Please try again later.";
     document.body.appendChild(errorDiv);
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadPortfolio());
+// Fix: Pass the function reference, don't call it immediately
+document.addEventListener("DOMContentLoaded", loadPortfolio);
