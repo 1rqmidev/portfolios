@@ -4,6 +4,8 @@ const firebaseConfig = {
   projectId: "my-project-datas-ef021",
 };
 
+
+
 // Initialize Firebase
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
