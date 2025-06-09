@@ -8,12 +8,15 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 function getCurrentPortfolioName() {
-  console.log("Starts + " + window.location.pathname);
-  const pathParts = window.location.pathname
-    .split("/")
-    .filter((part) => part.length > 0);
+  const pathParts = window.location.pathname.split("/").filter(Boolean); // removes empty strings
 
-  return pathParts[pathParts.length - 1].toLowerCase();
+  // Look for 'portfolios' in the path and get the part after it
+  const portfolioIndex = pathParts.indexOf("portfolios");
+  if (portfolioIndex !== -1 && pathParts.length > portfolioIndex + 1) {
+    return pathParts[portfolioIndex + 1].toLowerCase();
+  }
+
+  return null; // not found
 }
 
 function formatRelativeTime(date) {
