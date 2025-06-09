@@ -1,4 +1,35 @@
 document.addEventListener("DOMContentLoaded", (e) => {
+  fetch("https://views-worker.ramialmansur7.workers.dev/")
+    .then((response) => {
+      if (!response.ok) {
+        // Check for specific error status like 403 (Access Denied)
+        if (response.status === 403) {
+          throw new Error("Access Denied");
+        }
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then((views) => {
+      document.getElementById("view-counter").textContent = ` ${parseInt(
+        views
+      ).toLocaleString()} `;
+    })
+    .catch((error) => {
+      console.error(error);
+      if (error.message === "Failed to fetch") {
+        // Do something specific for Access Denied
+
+        document.getElementById("view-counter").textContent =
+          " (Access Denied) ";
+      } else {
+        console.log(error.message);
+        // Handle other errors
+        document.getElementById("view-counter").textContent =
+          "Error loading views";
+      }
+    });
+
   const teleportDiv = document.getElementById("teleport-div");
   const listItems = document.querySelectorAll("nav li");
 

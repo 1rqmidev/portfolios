@@ -1,6 +1,4 @@
 .gallery {
-  column-count: 4; /* or use media queries to make it responsive */
-  column-gap: 5px;
   padding: 5px;
   border-radius: var(--radius);
   border: 2px solid rgba(255, 255, 255, 0.07);
@@ -92,4 +90,82 @@
 }
 .gallery .image:hover h3 {
   opacity: 1;
+}
+
+.image[data-date]:has(.new-badge):hover::after {
+  content: attr(data-date);
+  top: 5px;
+  position: absolute;
+  border-radius: var(--radius);
+
+  right: 15px;
+  overflow: hidden;
+  padding: 5px var(--padding);
+  background: var(--turner);
+  color: var(--turner-turn);
+  font-size: 12px;
+  max-width: 500px;
+  white-space: nowrap;
+  transform: translate(-50%, 00%);
+  animation: showing 1s linear 1;
+}
+.image[data-date]:hover::after {
+  content: attr(data-date);
+  top: 5px;
+  position: absolute;
+  border-radius: var(--radius);
+
+  right: 5px;
+  overflow: hidden;
+  padding: 5px var(--padding);
+  background: var(--turner);
+  color: var(--turner-turn);
+  font-size: 12px;
+  max-width: 500px;
+  white-space: nowrap;
+  transform: translate(0%, 00%);
+  animation: showing 1s linear 1;
+}
+.image[data-date]::after {
+  max-width: 0;
+}
+@keyframes showing {
+  0% {
+    max-width: 0;
+  }
+  100% {
+    max-width: 500px;
+  }
+}
+.gallery .image:has(.new-badge) {
+  position: relative !important;
+  overflow: visible;
+}
+.new-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  border-radius: var(--radius);
+  background: var(--turner);
+  padding: 5px var(--padding);
+  color: var(--turner-turn);
+  font-size: 12px;
+  opacity: 0;
+  transform: translate(0, 00%);
+}
+.gallery .image:hover .new-badge {
+  opacity: 1;
+}
+.gallery .image {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-width: 200px;
+  justify-content: flex-end;
+  width: 25%;
+}
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
 }

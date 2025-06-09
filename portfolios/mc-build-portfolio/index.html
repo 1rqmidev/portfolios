@@ -26,83 +26,6 @@
     <!-- Swiper JS -->
     <link rel="stylesheet" href="/firefly.css" />
     <style>
-      .image[data-date]:has(.new-badge):hover::after {
-        content: attr(data-date);
-        top: 5px;
-        position: absolute;
-        border-radius: var(--radius);
-
-        right: 15px;
-        overflow: hidden;
-        padding: 5px var(--padding);
-        background: var(--turner);
-        color: var(--turner-turn);
-        font-size: 12px;
-        max-width: 500px;
-        white-space: nowrap;
-        transform: translate(-50%, 00%);
-        animation: showing 1s linear 1;
-      }
-      .image[data-date]:hover::after {
-        content: attr(data-date);
-        top: 5px;
-        position: absolute;
-        border-radius: var(--radius);
-
-        right: 5px;
-        overflow: hidden;
-        padding: 5px var(--padding);
-        background: var(--turner);
-        color: var(--turner-turn);
-        font-size: 12px;
-        max-width: 500px;
-        white-space: nowrap;
-        transform: translate(0%, 00%);
-        animation: showing 1s linear 1;
-      }
-      .image[data-date]::after {
-        max-width: 0;
-      }
-      @keyframes showing {
-        0% {
-          max-width: 0;
-        }
-        100% {
-          max-width: 500px;
-        }
-      }
-      .gallery .image:has(.new-badge) {
-        position: relative !important;
-        overflow: visible;
-      }
-      .new-badge {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        border-radius: var(--radius);
-        background: var(--turner);
-        padding: 5px var(--padding);
-        color: var(--turner-turn);
-        font-size: 12px;
-        opacity: 0;
-        transform: translate(0, 00%);
-      }
-      .gallery .image:hover .new-badge {
-        opacity: 1;
-      }
-      .gallery .image {
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        min-width: 400px;
-        justify-content: flex-end;
-        width: 25%;
-      }
-      .gallery {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-end;
-      }
       /* For NEW badge tooltip */
     </style>
   </head>
@@ -262,38 +185,7 @@
         </div>
       </footer>
     </div>
-    <script>
-      fetch("https://views-worker.ramialmansur7.workers.dev/")
-        .then((response) => {
-          if (!response.ok) {
-            // Check for specific error status like 403 (Access Denied)
-            if (response.status === 403) {
-              throw new Error("Access Denied");
-            }
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.text();
-        })
-        .then((views) => {
-          document.getElementById(
-            "view-counter"
-          ).textContent = `Views: ${parseInt(views).toLocaleString()}`;
-        })
-        .catch((error) => {
-          console.error(error);
-          if (error.message === "Failed to fetch") {
-            // Do something specific for Access Denied
-
-            document.getElementById("view-counter").textContent =
-              "(Access Denied)";
-          } else {
-            console.log(error.message);
-            // Handle other errors
-            document.getElementById("view-counter").textContent =
-              "Error loading views";
-          }
-        });
-    </script>
+    <script></script>
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="/firefly.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
