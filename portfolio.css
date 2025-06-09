@@ -4,6 +4,7 @@
   border: 2px solid rgba(255, 255, 255, 0.07);
   padding: var(--padding);
   margin: var(--padding) 0;
+  overflow: hidden;
 }
 .design-portfolio {
   height: 50vh;

@@ -10,12 +10,12 @@ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 function getCurrentPortfolioName() {
   const pathParts = window.location.pathname
     .split("/")
-    .filter((part) => part.length > 0); // remove empty strings from splitting
+    .filter((part) => part.length > 0);
 
-  // The last directory name is the last element in the path parts array
   return pathParts[pathParts.length - 1].toLowerCase();
 }
-console.log(getCurrentPortfolioName());
+
+console.log(getCurrentPortfolioName);
 function formatRelativeTime(date) {
   const seconds = Math.floor((new Date() - date) / 1000);
 
