@@ -8,6 +8,7 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 function getCurrentPortfolioName() {
+  console.log("Starts + " + window.location.pathname);
   const pathParts = window.location.pathname
     .split("/")
     .filter((part) => part.length > 0);
@@ -50,6 +51,7 @@ function formatDateForAttribute(date) {
 async function loadPortfolio() {
   try {
     const currentPage = getCurrentPortfolioName();
+    console.log(currentPage + "Currpage");
     const doc = await firebase
       .firestore()
       .collection("portfolios")
