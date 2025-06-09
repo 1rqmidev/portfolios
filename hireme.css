@@ -1,0 +1,78 @@
+.centerer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 120px var(--padding);
+}
+
+.centerer h3 {
+  width: 100%;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+}
+
+.centerer button {
+  min-width: max-content;
+  padding: 15px var(--padding);
+  font-size: clamp(16px, 2vw, 20px);
+  display: flex;
+  width: 15%;
+  outline: none;
+  border-radius: 60px;
+  border: none;
+  font-weight: 800;
+  justify-content: center;
+  margin: 10px 0;
+  background-color: var(--turner);
+  z-index: 15;
+  margin-top: 25px;
+  position: relative;
+  cursor: pointer;
+}
+.op {
+  opacity: 0.7;
+  font-weight: 300;
+}
+.centerer button::before,
+.centerer button::after {
+  transition: 0.3s;
+}
+.centerer button::after {
+  z-index: -1 !important;
+}
+.centerer button::before {
+  content: "";
+  position: relative;
+  height: calc(100% + var(--padding) * 2);
+  background-image: conic-gradient(white, transparent, transparent, white);
+  filter: blur(15px);
+  z-index: -2;
+  background-size: 100% 200%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(100%);
+  border-radius: 60px;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+.centerer button:hover::before {
+  filter: blur(25px);
+  width: calc(100% + var(--padding) * 2);
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  animation: updown 1s ease-in infinite alternate-reverse;
+  animation-delay: 0.5s;
+}
+
+@keyframes updown {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0 200%;
+    opacity: 0.8;
+  }
+}

@@ -1,0 +1,95 @@
+.gallery {
+  column-count: 4; /* or use media queries to make it responsive */
+  column-gap: 5px;
+  padding: 5px;
+  border-radius: var(--radius);
+  border: 2px solid rgba(255, 255, 255, 0.07);
+  padding: var(--padding);
+  margin: var(--padding) 0;
+}
+.design-portfolio {
+  height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  font-family: "Calligraffitti", cursive;
+  flex-direction: column;
+  padding-top: 100px;
+  font-size: clamp(20px, 5vw, 45px);
+  margin: 0 auto;
+}
+.design-portfolio span {
+  font-family: "Calligraffitti", cursive;
+}
+.design-portfolio a {
+  font-size: 16px;
+  opacity: 0.7;
+  padding: var(--padding);
+}
+.section-gallery {
+  width: 90%;
+
+  margin: 0 auto;
+}
+.gallery .image {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  flex: 1;
+  max-width: 50%;
+  justify-content: center;
+  transition: 0.3s;
+  align-items: center;
+}
+.gallery .image:hover img {
+}
+
+.gallery img {
+  width: 100%;
+  margin-bottom: 5px;
+  display: block;
+  height: auto;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.gallery .image h3 {
+  left: 5px;
+  top: 5px;
+  padding: 10px;
+  display: flex;
+  transform: translate(0, 0%);
+  position: absolute;
+  align-items: center;
+  border-radius: var(--radius);
+  padding: 5px var(--padding);
+  background: var(--turner);
+  color: var(--turner-turn);
+  font-size: 12px;
+  font-weight: 300;
+  overflow: hidden;
+  transition: 0.3s;
+  opacity: 0;
+}
+.heading-category {
+  background-image: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.07),
+    transparent
+  );
+  border-radius: var(--radius);
+  padding: var(--padding);
+  text-align: center;
+  text-transform: capitalize;
+}
+.last-updated {
+  width: 100%;
+  text-align: center;
+  padding: var(--padding);
+}
+.gallery .image:hover h3 {
+  opacity: 1;
+}

@@ -1,0 +1,3195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1RqMi Admin Panel</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <style>
+      :root {
+        --primary: #4361ee;
+        --primary-light: #eef2ff;
+        --dark: #1e293b;
+        --light: #f8fafc;
+        --gray: #94a3b8;
+        --danger: #ef4444;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --purple: #8b5cf6;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f1f5f9;
+        flex-direction: column;
+      }
+
+      /* Login Page */
+      .login {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        color: white;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .login h2 {
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        background: linear-gradient(90deg, #8b5cf6, #4361ee);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .login-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 40px;
+        max-width: 450px;
+        width: 100%;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .login-btn {
+        background: #4361ee;
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        font-size: 1.1rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        margin-top: 20px;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+      }
+
+      .login-btn:hover {
+        background: #3a56d4;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+      }
+
+      .login-btn i {
+        font-size: 1.4rem;
+      }
+
+      .logo {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        background: linear-gradient(90deg, #8b5cf6, #4361ee);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 260px;
+        background: linear-gradient(180deg, #1e293b, #0f172a);
+        color: white;
+        transition: all 0.3s ease;
+        position: fixed;
+        height: 100vh;
+        z-index: 100;
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .sidebar-header h2 {
+        color: white;
+        font-size: 1.4rem;
+        background: linear-gradient(90deg, #8b5cf6, #4361ee);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .sidebar-menu {
+        padding: 1rem 0;
+        overflow-y: auto;
+        height: calc(100vh - 80px);
+      }
+
+      .menu-item {
+        padding: 0.75rem 1.5rem;
+        display: flex;
+        align-items: center;
+        color: #cbd5e1;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+
+      .menu-item:hover,
+      .menu-item.active {
+        background: rgba(67, 97, 238, 0.2);
+        color: white;
+      }
+
+      .menu-item i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+        color: #8b5cf6;
+      }
+
+      /* Main Content */
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-left: 0;
+        transition: margin-left 0.3s ease;
+      }
+
+      .main.expanded {
+        margin-left: 260px;
+      }
+
+      /* Topbar */
+      .topbar {
+        padding: 1rem 1.5rem;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 90;
+      }
+
+      .menu-toggle {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: var(--dark);
+        cursor: pointer;
+        display: none;
+      }
+
+      .search-bar {
+        position: relative;
+        width: 300px;
+        max-width: 100%;
+      }
+
+      .search-bar input {
+        width: 100%;
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        outline: none;
+        transition: all 0.2s ease;
+      }
+
+      .search-bar input:focus {
+        border-color: var(--primary);
+      }
+
+      .search-bar i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+      }
+
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 1rem;
+        font-weight: 500;
+      }
+
+      /* Content Area */
+      .content {
+        flex: 1;
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        background-color: #f8fafc;
+      }
+
+      .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .page-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .page-title i {
+        color: var(--primary);
+      }
+
+      .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+      }
+
+      .btn i {
+        margin-right: 8px;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #3a56d4;
+      }
+
+      .btn-success {
+        background: var(--success);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #0da271;
+      }
+
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+      }
+
+      .btn-warning {
+        background: var(--warning);
+        color: white;
+      }
+
+      .btn-warning:hover {
+        background: #e5940c;
+      }
+
+      /* Content Card */
+      .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .card-title {
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .card-title i {
+        color: var(--primary);
+      }
+
+      /* Form Elements */
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--dark);
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        outline: none;
+        transition: all 0.2s ease;
+      }
+
+      .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+      }
+
+      textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+
+      /* Table */
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        min-width: 600px;
+      }
+
+      .table th,
+      .table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: var(--dark);
+      }
+
+      .table tr:hover {
+        background: #f8fafc;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .badge-success {
+        background: #d1fae5;
+        color: var(--success);
+      }
+
+      .badge-warning {
+        background: #fef3c7;
+        color: var(--warning);
+      }
+
+      .badge-danger {
+        background: #fee2e2;
+        color: var(--danger);
+      }
+
+      .action-btn {
+        background: none;
+        border: none;
+        color: var(--gray);
+        cursor: pointer;
+        margin: 0 4px;
+        transition: all 0.2s ease;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .action-btn:hover {
+        background: var(--primary-light);
+        color: var(--primary);
+      }
+
+      .action-btn.delete:hover {
+        background: #fee2e2;
+        color: var(--danger);
+      }
+
+      /* Stars */
+      .stars {
+        color: #fbbf24;
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+      }
+
+      /* Overlay for mobile */
+      .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+      .search-bar {
+        position: relative;
+        width: 300px;
+        max-width: 100%;
+        transition: all 0.3s ease;
+      }
+
+      .search-bar input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 3rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 50px;
+        outline: none;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        background-color: #f8fafc;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+
+      .search-bar input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        background-color: white;
+      }
+
+      .search-bar i {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        transition: all 0.3s ease;
+      }
+
+      .search-bar input:focus + i {
+        color: var(--primary);
+      }
+
+      .search-clear {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--gray);
+        cursor: pointer;
+        display: none;
+      }
+
+      .search-bar input:not(:placeholder-shown) + i + .search-clear {
+        display: block;
+      }
+      .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      /* Image Grid */
+      .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .image-item {
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        aspect-ratio: 1/1;
+      }
+
+      .image-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .search-highlight {
+        background-color: rgba(255, 255, 0, 0.3);
+        padding: 0 2px;
+        border-radius: 3px;
+      }
+      .image-actions {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        padding: 8px;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+      }
+
+      .image-item:hover .image-actions {
+        transform: translateY(0);
+      }
+
+      /* Review Card */
+      .review-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+      }
+
+      .review-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .review-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        overflow: hidden;
+      }
+
+      .review-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .review-info {
+        flex: 1;
+      }
+
+      .review-name {
+        font-weight: 600;
+        color: var(--dark);
+      }
+
+      .review-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--gray);
+        font-size: 0.9rem;
+        margin-top: 4px;
+      }
+
+      /* Responsive Breakpoints */
+      @media (min-width: 992px) {
+        .sidebar {
+          transform: translateX(0);
+        }
+
+        .main {
+          margin-left: 260px;
+        }
+
+        .menu-toggle {
+          display: none;
+        }
+      }
+
+      @media (max-width: 991px) {
+        .menu-toggle {
+          display: block;
+        }
+
+        .search-bar {
+          width: auto;
+          flex: 1;
+          margin: 0 1rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .content {
+          padding: 1rem;
+        }
+
+        .card {
+          padding: 1rem;
+        }
+
+        .table th,
+        .table td {
+          padding: 0.75rem;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .topbar {
+          flex-wrap: wrap;
+          gap: 1rem;
+          padding: 1rem;
+        }
+
+        .search-bar {
+          order: 3;
+          width: 100%;
+          margin: 0;
+        }
+
+        .user-menu {
+          margin-left: auto;
+        }
+
+        .login-card {
+          padding: 30px 20px;
+        }
+      }
+
+      .webpage {
+        display: none;
+      }
+
+      .tab-container {
+        margin-top: 1.5rem;
+      }
+
+      .tabs {
+        display: flex;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+      }
+
+      .tab {
+        padding: 0.75rem 1.5rem;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--gray);
+        position: relative;
+        transition: all 0.2s ease;
+      }
+
+      .tab.active {
+        color: var(--primary);
+      }
+
+      .tab.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--primary);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--gray);
+      }
+
+      .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #e2e8f0;
+      }
+      /* Add to your existing CSS */
+      .sidebar-menu .logout-btn {
+        margin-top: auto; /* Pushes to bottom */
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: #ef4444; /* Red color for logout */
+      }
+
+      .sidebar-menu .logout-btn i {
+        color: #ef4444; /* Match icon color */
+      }
+
+      .sidebar-menu .logout-btn:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #fff;
+      }
+      /* Image Library Styles */
+      .stats {
+        display: flex;
+        gap: 15px;
+        margin-left: auto;
+      }
+
+      .stat {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+      }
+
+      .stat i {
+        margin-right: 5px;
+        color: #666;
+      }
+
+      .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .image-item {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .image-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .image-container {
+        height: 200px;
+        overflow: hidden;
+      }
+
+      .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .image-info {
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f9f9f9;
+      }
+
+      .portfolio-name {
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+
+      .image-actions {
+        display: flex;
+        gap: 5px;
+      }
+
+      .btn-action {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #666;
+        padding: 5px;
+      }
+
+      .btn-action:hover {
+        color: #333;
+      }
+
+      .delete-btn:hover {
+        color: #e74c3c;
+      }
+
+      .loading-placeholder,
+      .empty-state,
+      .error-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px;
+        color: #666;
+      }
+
+      .portfolio-filter {
+        margin-left: auto;
+        width: 200px;
+      }
+
+      .upload-card {
+        margin-bottom: 20px;
+      }
+      .image-title {
+        display: block;
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 3px;
+      }
+      .social-link {
+        transition: transform 0.2s;
+      }
+      .social-link:hover {
+        transform: translateY(-2px);
+      }
+      .social-icon {
+        margin-right: 8px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login">
+      <div class="logo">
+        <i class="fas fa-cube"></i>
+      </div>
+      <h2>1RqMi Admin Panel</h2>
+      <div class="login-card">
+        <p>Sign in to manage your content</p>
+        <button class="login-btn" onclick="loginWithGoogle()">
+          <i class="fab fa-google"></i> Login with Google
+        </button>
+      </div>
+      <button
+        onclick="logout()"
+        style="
+          display: none;
+          margin-top: 20px;
+          background: transparent;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          padding: 10px 20px;
+          border-radius: 50px;
+        "
+        id="logoutBtn"
+      >
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+
+    <div class="webpage">
+      <!-- Sidebar Overlay -->
+      <div class="sidebar-overlay"></div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>1RqMi Admin</h2>
+          <button class="menu-toggle close-sidebar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <nav class="sidebar-menu">
+          <a href="#" class="menu-item active" data-tab="dashboard">
+            <i class="fas fa-home"></i>
+            Dashboard
+          </a>
+          <a href="#" class="menu-item" data-tab="reviews">
+            <i class="fas fa-star"></i>
+            Reviews
+          </a>
+          <a href="#" class="menu-item" data-tab="status">
+            <i class="fas fa-info-circle"></i>
+            Status
+          </a>
+          <a href="#" class="menu-item" data-tab="social">
+            <i class="fas fa-share-alt"></i>
+            Social Media
+          </a>
+          <a href="#" class="menu-item" data-tab="products">
+            <i class="fas fa-shopping-bag"></i>
+            Products
+          </a>
+          <a href="#" class="menu-item" data-tab="images">
+            <i class="fas fa-images"></i>
+            Image Library
+          </a>
+
+          <a href="#" class="menu-item logout-btn" id="sidebarLogoutBtn">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main">
+        <!-- Topbar -->
+        <header class="topbar">
+          <button class="menu-toggle open-sidebar">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-bar">
+            <input type="text" placeholder="Search..." id="globalSearch" />
+            <i class="fas fa-search"></i>
+            <button class="search-clear" id="clearSearch">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="user-menu">
+            <span class="user-name" id="userName">Admin User</span>
+            <div class="user-avatar" id="userAvatar">AU</div>
+          </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content">
+          <!-- Dashboard Tab -->
+          <div class="tab-content active" id="dashboard-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-home"></i>
+                Dashboard
+              </h1>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-tachometer-alt"></i>
+                  Overview
+                </h3>
+              </div>
+
+              <div class="grid-2">
+                <div
+                  class="card"
+                  style="
+                    background: linear-gradient(135deg, #4361ee, #8b5cf6);
+                    color: white;
+                  "
+                >
+                  <h3><i class="fas fa-star"></i> Reviews</h3>
+                  <p style="font-size: 2.5rem; margin: 1rem 0" id="reviewCount">
+                    0
+                  </p>
+                  <p>Manage customer feedback</p>
+                </div>
+
+                <div
+                  class="card"
+                  style="
+                    background: linear-gradient(135deg, #10b981, #059669);
+                    color: white;
+                  "
+                >
+                  <h3><i class="fas fa-shopping-bag"></i> Products</h3>
+                  <p
+                    style="font-size: 2.5rem; margin: 1rem 0"
+                    id="productCount"
+                  >
+                    0
+                  </p>
+                  <p>Manage your offerings</p>
+                </div>
+
+                <div
+                  class="card"
+                  style="
+                    background: linear-gradient(135deg, #f59e0b, #d97706);
+                    color: white;
+                  "
+                >
+                  <h3><i class="fas fa-image"></i> Images</h3>
+                  <p style="font-size: 2.5rem; margin: 1rem 0" id="imageCount">
+                    0
+                  </p>
+                  <p>Manage your media library</p>
+                </div>
+
+                <div
+                  class="card"
+                  style="
+                    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                    color: white;
+                  "
+                >
+                  <h3><i class="fas fa-users"></i> Social Media</h3>
+                  <p style="font-size: 2.5rem; margin: 1rem 0" id="socialCount">
+                    0
+                  </p>
+                  <p>Manage your social presence</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-sync-alt"></i>
+                  Recent Activity
+                </h3>
+              </div>
+              <div class="recent-reviews" id="recentReviews"></div>
+            </div>
+          </div>
+
+          <!-- Reviews Tab -->
+          <div class="tab-content" id="reviews-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-star"></i>
+                Manage Reviews
+              </h1>
+              <button class="btn btn-primary" id="addReviewBtn">
+                <i class="fas fa-plus"></i>
+                Add Review
+              </button>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-plus-circle"></i>
+                  Add New Review
+                </h3>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="reviewName"
+                    placeholder="Reviewer name"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Service</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="reviewService"
+                    placeholder="Service provided"
+                  />
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Date</label>
+                  <input type="date" class="form-control" id="reviewDate" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Stars (1-5)</label>
+                  <select class="form-control" id="reviewStars">
+                    <option value="5">★★★★★</option>
+                    <option value="4">★★★★☆</option>
+                    <option value="3">★★★☆☆</option>
+                    <option value="2">★★☆☆☆</option>
+                    <option value="1">★☆☆☆☆</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Review Description</label>
+                <textarea
+                  class="form-control"
+                  id="reviewDescription"
+                  placeholder="Review content"
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Image URL</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="reviewImage"
+                  placeholder="Image URL for reviewer"
+                />
+              </div>
+
+              <button class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Save Review
+              </button>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-list"></i>
+                  Existing Reviews
+                </h3>
+              </div>
+
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Service</th>
+                      <th>Stars</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reviewsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Tab -->
+          <!-- Status Tab -->
+          <div class="tab-content" id="status-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-info-circle"></i>
+                Profile Information
+              </h1>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-pencil-alt"></i>
+                  Edit Profile
+                </h3>
+              </div>
+
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Avatar URL</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="avatarInput"
+                    placeholder="Enter image URL for your avatar"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Current Status</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="statusInput"
+                    placeholder="What's your status?"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Description</label>
+                  <textarea
+                    class="form-control"
+                    id="descriptionInput"
+                    rows="3"
+                    placeholder="Tell something about yourself"
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Age</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="ageInput"
+                    placeholder="Your age"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Hobbies</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="hobbiesInput"
+                    placeholder="Your hobbies/interests"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Studying</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="studyingInput"
+                    placeholder="What are you studying?"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Located</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="locatedInput"
+                    placeholder="Where are you located?"
+                  />
+                </div>
+
+                <button class="btn btn-primary" onclick="saveProfile()">
+                  <i class="fas fa-save"></i>
+                  Update Profile
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Social Media Tab -->
+          <!-- Social Media Tab -->
+          <div class="tab-content" id="social-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-share-alt"></i>
+                Social Media Links
+              </h1>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-link"></i>
+                  Manage Social Profiles
+                </h3>
+                <button id="addSocialBtn" class="btn btn-success btn-sm">
+                  <i class="fas fa-plus"></i> Add New Link
+                </button>
+              </div>
+
+              <div class="card-body">
+                <!-- Current Links Display -->
+                <div id="socialLinksContainer" class="row">
+                  <!-- Links will be dynamically inserted here -->
+                </div>
+
+                <!-- Add/Edit Form (hidden by default) -->
+                <div
+                  id="socialFormContainer"
+                  class="mt-4"
+                  style="display: none"
+                >
+                  <div class="form-group">
+                    <label class="form-label">Platform Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="socialPlatformName"
+                      placeholder="e.g. Twitter, GitHub"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Profile URL</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="socialProfileUrl"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Icon URL (optional)</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="socialIconUrl"
+                      placeholder="https://.../icon.png"
+                    />
+                    <small class="text-muted"
+                      >Leave blank to use default platform icon</small
+                    >
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">CSS Class (optional)</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="socialCssClass"
+                      placeholder="custom-class"
+                    />
+                    <small class="text-muted"
+                      >For custom styling of this link</small
+                    >
+                  </div>
+
+                  <button id="saveSocialBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Save Link
+                  </button>
+                  <button id="cancelSocialBtn" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                  </button>
+                  <input type="hidden" id="socialEditId" value="" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products Tab -->
+          <!-- Products Tab -->
+          <div class="tab-content" id="products-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-shopping-bag"></i>
+                Product Management
+              </h1>
+              <button class="btn btn-primary" id="addProductBtn">
+                <i class="fas fa-plus"></i>
+                Add Product
+              </button>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-cube"></i>
+                  Add New Product
+                </h3>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Product Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="productTitle"
+                    placeholder="Product name"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Price ($)</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="productPrice"
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea
+                  class="form-control"
+                  id="productDescription"
+                  placeholder="Product description"
+                ></textarea>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Preview Type</label>
+                  <select class="form-control" id="productPreviewType">
+                    <option value="3D">3D</option>
+                    <option value="Images">Images</option>
+                    <option value="Images & 3D">Images & 3D</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Game Type</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="productGameType"
+                    placeholder="Game genre or type"
+                  />
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Initial Views</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="productViews"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Initial Purchases</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="productPurchases"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Product Link</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="productLink"
+                  placeholder="URL to product page"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Image URLs (one per line)</label>
+                <textarea
+                  class="form-control"
+                  id="productImages"
+                  placeholder="https://example.com/image1.jpg
+https://example.com/image2.jpg"
+                ></textarea>
+              </div>
+
+              <div class="form-group form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="productStatus"
+                  checked
+                />
+                <label class="form-check-label" for="productStatus"
+                  >Visible to users</label
+                >
+              </div>
+
+              <button class="btn btn-primary" onclick="saveProduct()">
+                <i class="fas fa-save"></i>
+                Save Product
+              </button>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-boxes"></i>
+                  Existing Products
+                </h3>
+              </div>
+
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Price</th>
+                      <th>Preview</th>
+                      <th>Game Type</th>
+                      <th>Views</th>
+                      <th>Purchases</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="productsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image Library Tab -->
+
+          <!-- In the HTML, update the image upload form in the images-tab section -->
+          <div class="tab-content" id="images-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-images"></i>
+                Image Library
+              </h1>
+              <div class="stats">
+                <span class="stat"
+                  ><i class="fas fa-folder"></i>
+                  <span id="totalPortfolios">0</span> Portfolios</span
+                >
+                <span class="stat"
+                  ><i class="fas fa-image"></i>
+                  <span id="totalImages">0</span> Images</span
+                >
+              </div>
+            </div>
+
+            <div class="card upload-card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  Upload New Image
+                </h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Select Portfolio</label>
+                  <select class="form-control" id="imagePortfolio">
+                    <option value="">Loading portfolios...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="imageTitle">Image Title (optional)</label>
+                  <input
+                    type="text"
+                    id="imageTitle"
+                    class="form-control"
+                    placeholder="Leave empty to auto-generate (Category-Number)"
+                  />
+                </div>
+
+                <div id="newPortfolioGroup" style="display: none">
+                  <div class="form-group">
+                    <label class="form-label">New Portfolio Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="newPortfolioName"
+                      placeholder="e.g., Web Design"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Image URL</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="imageUrl"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
+
+                <!-- Add the category input field here -->
+                <div class="form-group">
+                  <label class="form-label">Category</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="imageCategory"
+                    placeholder="e.g., logo, webdesign"
+                  />
+                </div>
+
+                <button class="btn btn-primary" id="saveImageBtn">
+                  <i class="fas fa-save"></i> Save Image
+                </button>
+              </div>
+            </div>
+
+            <div class="card images-card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-images"></i>
+                  Current Images
+                </h3>
+                <div class="portfolio-filter">
+                  <select class="form-control" id="portfolioFilter">
+                    <option value="all">All Portfolios</option>
+                  </select>
+                  <!-- Add the category filter dropdown next to the portfolio filter -->
+                  <select class="form-control" id="categoryFilter">
+                    <option value="all">All Categories</option>
+                  </select>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="image-grid" id="imageGrid">
+                  <div class="loading-placeholder">
+                    <i class="fas fa-spinner fa-spin"></i> Loading images...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+
+    <!-- Cloud Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Check if Firebase is loaded
+        if (typeof firebase === "undefined") {
+          console.error("Firebase is not loaded");
+          alert("Firebase failed to load. Please refresh the page.");
+          return;
+        }
+
+        // Firebase config
+        const firebaseConfig = {
+          apiKey: "AIzaSyBaWzgDT01temNKWI4L8yGIVZxQ4jDHYrc",
+          authDomain: "my-project-datas-ef021.firebaseapp.com",
+          projectId: "my-project-datas-ef021",
+        };
+
+        // Initialize Firebase
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+          }
+
+          // Initialize services
+          window.auth = firebase.auth();
+          window.db = firebase.firestore();
+
+          console.log("Firebase initialized successfully");
+
+          // Initialize the app after Firebase is ready
+          initializeApp();
+        } catch (error) {
+          console.error("Firebase initialization failed:", error);
+          alert("Firebase initialization failed. Please refresh the page.");
+        }
+      });
+
+      // Global variables
+      let auth, db;
+
+      // Allowed email
+      const ALLOWED_EMAIL = "ramialmansur7@gmail.com";
+
+      // Global variables for editing
+      let editingReviewId = null;
+      let editingProductId = null;
+
+      // DOM elements
+      const loginSection = document.querySelector(".login");
+      const adminPanel = document.querySelector(".webpage");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const userName = document.getElementById("userName");
+      const userAvatar = document.getElementById("userAvatar");
+
+      // Initialize the main app functionality
+      function initializeApp() {
+        // Get Firebase services
+        auth = window.auth;
+        db = window.db;
+
+        // Set auth persistence
+        auth
+          .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+          .then(() => {
+            // Set up auth state listener
+            auth.onAuthStateChanged((user) => {
+              if (user && user.email === ALLOWED_EMAIL) {
+                // User is signed in and authorized
+                loginSection.style.display = "none";
+                adminPanel.style.display = "block";
+                logoutBtn.style.display = "inline-block";
+
+                // Set user info
+                userName.textContent = user.displayName || "Admin User";
+                userAvatar.textContent = user.displayName
+                  ? user.displayName.charAt(0)
+                  : "AU";
+
+                // Load data
+                loadAllData();
+              } else {
+                // User is signed out or not authorized
+                if (user && user.email !== ALLOWED_EMAIL) {
+                  showNotification(
+                    "Access denied. You are not authorized to use this admin panel.",
+                    "error"
+                  );
+                  auth.signOut();
+                }
+                loginSection.style.display = "flex";
+                adminPanel.style.display = "none";
+                logoutBtn.style.display = "none";
+              }
+            });
+          })
+          .catch((error) => {
+            console.error("Auth persistence error:", error);
+          });
+      }
+
+      // Login with Google
+      function loginWithGoogle() {
+        if (!auth) {
+          console.error("Auth not initialized");
+          alert("Authentication service not ready. Please try again.");
+          return;
+        }
+
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch((error) => {
+          console.error("Login failed:", error);
+          showNotification("Login failed. Please try again.", "error");
+        });
+      }
+
+      // Logout function
+      function logout() {
+        if (!auth) {
+          console.error("Auth not initialized");
+          return;
+        }
+        auth.signOut();
+      }
+
+      // Load all data from Firestore
+      async function loadAllData() {
+        try {
+          await Promise.all([loadReviews(), loadProducts(), loadImages()]);
+          updateCounts();
+        } catch (error) {
+          console.error("Error loading data:", error);
+          showNotification("Error loading data", "error");
+        }
+      }
+      // Load reviews from Firestore
+      async function loadReviews() {
+        try {
+          const snapshot = await db
+            .collection("reviews")
+            .orderBy("timestamp", "desc")
+            .get();
+          const reviewsTableBody = document.getElementById("reviewsTableBody");
+          const recentReviews = document.getElementById("recentReviews");
+
+          // Add null checks
+          if (!reviewsTableBody || !recentReviews) {
+            console.error("Review elements not found");
+            return;
+          }
+
+          reviewsTableBody.innerHTML = "";
+          recentReviews.innerHTML = "";
+
+          if (snapshot.empty) {
+            reviewsTableBody.innerHTML =
+              '<tr><td colspan="5" class="text-center">No reviews found</td></tr>';
+            recentReviews.innerHTML =
+              '<p class="text-center">No recent reviews</p>';
+            return;
+          }
+
+          snapshot.forEach((doc) => {
+            const review = { id: doc.id, ...doc.data() };
+
+            // Add to table
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${escapeHtml(review.name)}</td>
+              <td>${escapeHtml(review.service)}</td>
+              <td><span class="stars">${"★".repeat(review.stars)}${"☆".repeat(
+              5 - review.stars
+            )}</span></td>
+              <td>${review.date || "N/A"}</td>
+              <td>
+                <button class="action-btn" onclick="editReview('${
+                  review.id
+                }')" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete" onclick="deleteReview('${
+                  review.id
+                }')" title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            `;
+            reviewsTableBody.appendChild(row);
+
+            // Add to recent reviews (only first 3)
+            if (recentReviews.children.length < 3) {
+              const reviewCard = document.createElement("div");
+              reviewCard.className = "review-card";
+              reviewCard.innerHTML = `
+                <div class="review-header">
+                  <div class="review-avatar">
+                    ${
+                      review.image
+                        ? `<img src="${review.image}" alt="${escapeHtml(
+                            review.name
+                          )}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`
+                        : `<i class="fas fa-user" style="font-size: 1.5rem; color: #4361ee"></i>`
+                    }
+                  </div>
+                  <div class="review-info">
+                    <div class="review-name">${escapeHtml(review.name)}</div>
+                    <div class="review-meta">
+                      <div class="stars">${"★".repeat(
+                        review.stars
+                      )}${"☆".repeat(5 - review.stars)}</div>
+                      <span>•</span>
+                      <span>${review.date || "N/A"}</span>
+                      <span>•</span>
+                      <span>Service: ${escapeHtml(review.service)}</span>
+                    </div>
+                  </div>
+                </div>
+                <p>"${escapeHtml(review.description)}"</p>
+              `;
+              recentReviews.appendChild(reviewCard);
+            }
+          });
+        } catch (error) {
+          console.error("Error loading reviews:", error);
+          showNotification("Error loading reviews", "error");
+        }
+      }
+
+      // DOM Ready
+      document.addEventListener("DOMContentLoaded", function () {
+        initPortfolioDropdowns();
+        loadImages();
+        setupEventListeners();
+      });
+
+      // Initialize portfolio dropdowns
+      async function initPortfolioDropdowns() {
+        try {
+          const snapshot = await db.collection("portfolios").get();
+          const portfolioSelect = document.getElementById("imagePortfolio");
+          const portfolioFilter = document.getElementById("portfolioFilter");
+          const categoryFilter = document.getElementById("categoryFilter");
+
+          // Clear existing options
+          portfolioSelect.innerHTML = "";
+          portfolioFilter.innerHTML =
+            '<option value="all">All Portfolios</option>';
+          categoryFilter.innerHTML =
+            '<option value="all">All Categories</option>';
+
+          // Add "Create New" option to select
+          const newOption = document.createElement("option");
+          newOption.value = "new";
+          newOption.textContent = "+ Create New Portfolio";
+          portfolioSelect.appendChild(newOption);
+
+          // Add existing portfolios
+          const categories = new Set();
+          let firstPortfolioId = null;
+
+          snapshot.forEach((doc) => {
+            const portfolioName = doc.data().displayName || doc.id;
+
+            // Add to select dropdown
+            const option = document.createElement("option");
+            option.value = doc.id;
+            option.textContent = portfolioName;
+            portfolioSelect.appendChild(option.cloneNode(true));
+
+            // Add to filter dropdown
+            portfolioFilter.appendChild(option);
+
+            // Track first portfolio
+            if (!firstPortfolioId) {
+              firstPortfolioId = doc.id;
+            }
+
+            // Collect categories from this portfolio
+            Object.entries(doc.data()).forEach(([key, value]) => {
+              if (key.startsWith("image") && value.category) {
+                categories.add(value.category);
+              }
+            });
+          });
+
+          // Set default selected portfolio (first one if exists)
+          if (firstPortfolioId) {
+            portfolioSelect.value = firstPortfolioId;
+          } else {
+            portfolioSelect.value = "new";
+            document.getElementById("newPortfolioGroup").style.display =
+              "block";
+          }
+
+          // Add category options
+          categories.forEach((category) => {
+            const option = document.createElement("option");
+            option.value = category;
+            option.textContent = category;
+            categoryFilter.appendChild(option);
+          });
+
+          // Update counts
+          updateCounts();
+        } catch (error) {
+          console.error("Error loading portfolios:", error);
+        }
+      }
+      function setupEventListeners() {
+        // Show/hide new portfolio field
+        document
+          .getElementById("imagePortfolio")
+          .addEventListener("change", function () {
+            document.getElementById("newPortfolioGroup").style.display =
+              this.value === "new" ? "block" : "none";
+          });
+
+        // Save image button
+        document
+          .getElementById("saveImageBtn")
+          .addEventListener("click", saveImage);
+
+        // Portfolio filter
+        document
+          .getElementById("portfolioFilter")
+          .addEventListener("change", loadImages);
+
+        // Category filter
+        document
+          .getElementById("categoryFilter")
+          .addEventListener("change", loadImages);
+      }
+      // Save image to portfolio
+      // Save image to portfolio
+      async function saveImage() {
+        const imageUrl = document.getElementById("imageUrl").value.trim();
+        const portfolioSelect = document.getElementById("imagePortfolio");
+        const selectedOption = portfolioSelect.value;
+        const imageCategory = document
+          .getElementById("imageCategory")
+          .value.trim();
+        const imageTitle = document.getElementById("imageTitle").value.trim();
+
+        // Validate inputs
+        if (!imageUrl) {
+          alert("Please enter an image URL");
+          return;
+        }
+
+        if (selectedOption === "new") {
+          const newName = document
+            .getElementById("newPortfolioName")
+            .value.trim();
+          if (!newName) {
+            alert("Please enter a portfolio name");
+            return;
+          }
+        } else if (!selectedOption) {
+          alert("Please select a portfolio");
+          return;
+        }
+
+        try {
+          // Create portfolio slug
+          const portfolioName =
+            selectedOption === "new"
+              ? document.getElementById("newPortfolioName").value.trim()
+              : portfolioSelect.options[portfolioSelect.selectedIndex].text;
+
+          const portfolioSlug = portfolioName
+            .toLowerCase()
+            .replace(/\s+/g, "-");
+
+          // Get or create portfolio document
+          const portfolioRef = db.collection("portfolios").doc(portfolioSlug);
+          const doc = await portfolioRef.get();
+
+          // Prepare update data
+          const updateData = {
+            displayName: portfolioName,
+            lastEdited: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+
+          // Get current date in YYYY-MM-DD format
+          const uploadDate = new Date().toISOString().split("T")[0];
+
+          if (doc.exists) {
+            const existingData = doc.data();
+            const imageFields = Object.keys(existingData).filter((key) =>
+              key.startsWith("image")
+            );
+
+            // Check for duplicate image
+            for (const field of imageFields) {
+              if (existingData[field].url === imageUrl) {
+                alert("This image already exists in this portfolio!");
+                return;
+              }
+            }
+
+            // Count how many images are in the same category
+            const sameCategoryCount = imageFields.filter((field) => {
+              return existingData[field].category === imageCategory;
+            }).length;
+
+            // Generate default title if empty
+            const finalTitle =
+              imageTitle ||
+              `${imageCategory || "uncategorized"}-${sameCategoryCount + 1}`;
+
+            // Add new image with next available number
+            updateData[`image${imageFields.length + 1}`] = {
+              url: imageUrl,
+              category: imageCategory || "uncategorized",
+              title: finalTitle,
+              uploadedAt: uploadDate,
+            };
+          } else {
+            // First image for new portfolio
+            const finalTitle =
+              imageTitle || `${imageCategory || "uncategorized"}-1`;
+
+            updateData.image1 = {
+              url: imageUrl,
+              category: imageCategory || "uncategorized",
+              title: finalTitle,
+              uploadedAt: uploadDate,
+            };
+            updateData.createdAt =
+              firebase.firestore.FieldValue.serverTimestamp();
+          }
+
+          // Update Firestore
+          await portfolioRef.set(updateData, { merge: true });
+
+          // Reset form
+          document.getElementById("imageUrl").value = "";
+          document.getElementById("imageCategory").value = "";
+          document.getElementById("imageTitle").value = "";
+          if (selectedOption === "new") {
+            document.getElementById("newPortfolioName").value = "";
+            document.getElementById("newPortfolioGroup").style.display = "none";
+          }
+
+          // Refresh UI
+          initPortfolioDropdowns();
+          loadImages();
+
+          alert("Image saved successfully!");
+        } catch (error) {
+          console.error("Error saving image:", error);
+          alert("Error saving image: " + error.message);
+        }
+      }
+
+      // Create image item in grid (updated to show title)
+      function createImageItem(
+        container,
+        imageUrl,
+        portfolioName,
+        portfolioSlug,
+        imageKey,
+        imageData
+      ) {
+        const item = document.createElement("div");
+        item.className = "image-item";
+
+        // Format date for display (show as DD/MM/YYYY if available)
+        let displayDate = "No date";
+        if (imageData.uploadedAt) {
+          const [year, month, day] = imageData.uploadedAt.split("-");
+          displayDate = `${day}/${month}/${year}`;
+        } else if (imageData.createdAt) {
+          // Fallback to portfolio creation date if available
+          const date = imageData.createdAt.toDate();
+          displayDate = `${date.getDate()}/${
+            date.getMonth() + 1
+          }/${date.getFullYear()}`;
+        }
+
+        item.innerHTML = `
+    <div class="image-container">
+      <img src="${imageUrl}" alt="Portfolio image" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjYWFhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2U8L3RleHQ+PC9zdmc+'">
+      <div class="image-category">${imageData.category || "uncategorized"}</div>
+    </div>
+    <div class="image-info">
+      <span class="portfolio-name">${portfolioName}</span>
+      <span class="image-title">${imageData.title || ""}</span>
+      <span class="image-date">${displayDate}</span>
+      <div class="image-actions">
+        <button class="btn-action copy-btn" title="Copy URL" data-url="${imageUrl}">
+          <i class="fas fa-copy"></i>
+        </button>
+        <button class="btn-action delete-btn" title="Delete" data-portfolio="${portfolioSlug}" data-key="${imageKey}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `;
+
+        // Add event listeners
+        item.querySelector(".copy-btn").addEventListener("click", copyImageUrl);
+        item
+          .querySelector(".delete-btn")
+          .addEventListener("click", deleteImage);
+
+        container.appendChild(item);
+      }
+
+      // Update the loadImages function to pass the full image data
+      async function loadImages() {
+        const portfolioFilter =
+          document.getElementById("portfolioFilter").value;
+        const categoryFilter = document.getElementById("categoryFilter").value;
+        const imageGrid = document.getElementById("imageGrid");
+
+        imageGrid.innerHTML =
+          '<div class="loading-placeholder"><i class="fas fa-spinner fa-spin"></i> Loading images...</div>';
+
+        try {
+          let query = db.collection("portfolios");
+          const snapshot = await query.get();
+
+          imageGrid.innerHTML = "";
+
+          if (snapshot.empty) {
+            imageGrid.innerHTML =
+              '<div class="empty-state">No images found</div>';
+            return;
+          }
+
+          let imagesLoaded = 0;
+
+          snapshot.forEach((doc) => {
+            const portfolioData = doc.data();
+            const portfolioSlug = doc.id;
+            const portfolioName = portfolioData.displayName || portfolioSlug;
+
+            // Skip if portfolio filtering and this isn't the selected portfolio
+            if (
+              portfolioFilter !== "all" &&
+              portfolioFilter !== portfolioSlug
+            ) {
+              return;
+            }
+
+            // Process each image in the portfolio
+            Object.entries(portfolioData).forEach(([key, value]) => {
+              if (key.startsWith("image")) {
+                // Skip if category filtering and this isn't the selected category
+                if (
+                  categoryFilter !== "all" &&
+                  value.category !== categoryFilter
+                ) {
+                  return;
+                }
+
+                createImageItem(
+                  imageGrid,
+                  value.url,
+                  portfolioName,
+                  portfolioSlug,
+                  key,
+                  value
+                );
+                imagesLoaded++;
+              }
+            });
+          });
+
+          // If no images after filtering
+          if (imagesLoaded === 0) {
+            imageGrid.innerHTML =
+              '<div class="empty-state">No images found matching your filters</div>';
+          }
+        } catch (error) {
+          console.error("Error loading images:", error);
+          imageGrid.innerHTML =
+            '<div class="error-state">Error loading images</div>';
+        }
+      }
+
+      // Create image item in grid
+      function createImageItem(
+        container,
+        imageUrl,
+        portfolioName,
+        portfolioSlug,
+        imageKey,
+        category
+      ) {
+        const item = document.createElement("div");
+        item.className = "image-item";
+
+        item.innerHTML = `
+    <div class="image-container">
+      <img src="${imageUrl}" alt="Portfolio image" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjYWFhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+SW1hZ2U8L3RleHQ+PC9zdmc+'">
+      <div class="image-category">${category || "uncategorized"}</div>
+    </div>
+    <div class="image-info">
+      <span class="portfolio-name">${portfolioName}</span>
+      <div class="image-actions">
+        <button class="btn-action copy-btn" title="Copy URL" data-url="${imageUrl}">
+          <i class="fas fa-copy"></i>
+        </button>
+        <button class="btn-action delete-btn" title="Delete" data-portfolio="${portfolioSlug}" data-key="${imageKey}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `;
+
+        // Add event listeners
+        item.querySelector(".copy-btn").addEventListener("click", copyImageUrl);
+        item
+          .querySelector(".delete-btn")
+          .addEventListener("click", deleteImage);
+
+        container.appendChild(item);
+      }
+
+      // Copy image URL to clipboard
+      function copyImageUrl(event) {
+        const url = event.currentTarget.getAttribute("data-url");
+        navigator.clipboard
+          .writeText(url)
+          .then(() => alert("URL copied to clipboard!"))
+          .catch((err) => console.error("Could not copy text: ", err));
+      }
+
+      // Delete image from portfolio
+
+      // Update portfolio and image counts
+
+      // Update counts on dashboard
+      async function updateCounts() {
+        try {
+          const [reviewsSnapshot, productsSnapshot, imagesSnapshot] =
+            await Promise.all([
+              db.collection("reviews").get(),
+              db.collection("products").get(),
+              db.collection("images").get(),
+            ]);
+          const snapshot = await db.collection("portfolios").get();
+          let totalImages = 0;
+
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const imageCount = Object.keys(data).filter((key) =>
+              key.startsWith("image")
+            ).length;
+            totalImages += imageCount;
+          });
+
+          document.getElementById("totalPortfolios").textContent =
+            snapshot.size;
+          document.getElementById("totalImages").textContent = totalImages;
+          document.getElementById("reviewCount").textContent =
+            reviewsSnapshot.size;
+          document.getElementById("productCount").textContent =
+            productsSnapshot.size;
+          document.getElementById("imageCount").textContent =
+            imagesSnapshot.size;
+        } catch (error) {
+          console.error("Error updating counts:", error);
+          showNotification("Error updating counts", "error");
+        }
+      }
+
+      // Save review to Firestore
+      async function saveReview() {
+        try {
+          const reviewData = {
+            name: document.getElementById("reviewName").value.trim(),
+            service: document.getElementById("reviewService").value.trim(),
+            date: document.getElementById("reviewDate").value,
+            stars: parseInt(document.getElementById("reviewStars").value),
+            description: document
+              .getElementById("reviewDescription")
+              .value.trim(),
+            image: document.getElementById("reviewImage").value.trim(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+
+          // Validation
+          if (
+            !reviewData.name ||
+            !reviewData.service ||
+            !reviewData.description
+          ) {
+            alert(
+              "Please fill in all required fields (Name, Service, Description)"
+            );
+            return;
+          }
+
+          if (!reviewData.date) {
+            reviewData.date = new Date().toISOString().split("T")[0];
+          }
+
+          if (editingReviewId) {
+            // Update existing review
+            await db
+              .collection("reviews")
+              .doc(editingReviewId)
+              .update(reviewData);
+            showNotification("Review updated successfully!", "success");
+            editingReviewId = null;
+          } else {
+            // Add new review
+            await db.collection("reviews").add(reviewData);
+            showNotification("Review added successfully!", "success");
+          }
+
+          // Clear form
+          clearReviewForm();
+          await loadReviews();
+          await updateCounts();
+        } catch (error) {
+          console.error("Error saving review:", error);
+          showNotification("Error saving review. Please try again.", "error");
+        }
+      }
+      // Load status from Firestore
+      // Load profile data from Firestore
+      async function loadProfile() {
+        try {
+          const doc = await db.collection("settings").doc("profile").get();
+          if (doc.exists) {
+            const data = doc.data();
+
+            // Set values for all fields
+            document.getElementById("avatarInput").value = data.avatar || "";
+            document.getElementById("statusInput").value = data.status || "";
+            document.getElementById("descriptionInput").value =
+              data.description || "";
+            document.getElementById("ageInput").value = data.age || "";
+            document.getElementById("hobbiesInput").value = data.hobbies || "";
+            document.getElementById("studyingInput").value =
+              data.studying || "";
+            document.getElementById("locatedInput").value = data.located || "";
+          } else {
+            // Set default values if document doesn't exist
+            document.getElementById("statusInput").value = "Map for 1RqMi";
+          }
+        } catch (error) {
+          console.error("Error loading profile:", error);
+          showNotification("Error loading profile data", "error");
+        }
+      }
+
+      // Save profile to Firestore
+      async function saveProfile() {
+        try {
+          const profileData = {
+            avatar: document.getElementById("avatarInput").value.trim(),
+            status: document.getElementById("statusInput").value.trim(),
+            description: document
+              .getElementById("descriptionInput")
+              .value.trim(),
+            age: document.getElementById("ageInput").value.trim(),
+            hobbies: document.getElementById("hobbiesInput").value.trim(),
+            studying: document.getElementById("studyingInput").value.trim(),
+            located: document.getElementById("locatedInput").value.trim(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+
+          await db
+            .collection("settings")
+            .doc("profile")
+            .set(profileData, { merge: true });
+
+          showNotification("Profile updated successfully!", "success");
+        } catch (error) {
+          console.error("Error saving profile:", error);
+          showNotification("Error saving profile. Please try again.", "error");
+        }
+      }
+
+      // Call loadProfile when the page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        loadProfile();
+      });
+
+      // Edit review function
+      async function editReview(reviewId) {
+        try {
+          const doc = await db.collection("reviews").doc(reviewId).get();
+          if (doc.exists) {
+            const review = doc.data();
+
+            // Fill form with existing data
+            document.getElementById("reviewName").value = review.name || "";
+            document.getElementById("reviewService").value =
+              review.service || "";
+            document.getElementById("reviewDate").value = review.date || "";
+            document.getElementById("reviewStars").value = review.stars || 5;
+            document.getElementById("reviewDescription").value =
+              review.description || "";
+            document.getElementById("reviewImage").value = review.image || "";
+
+            editingReviewId = reviewId;
+
+            // Switch to reviews tab
+            switchTab("reviews");
+
+            showNotification("Review loaded for editing", "info");
+          }
+        } catch (error) {
+          console.error("Error loading review for editing:", error);
+          showNotification("Error loading review for editing", "error");
+        }
+      }
+
+      // Delete review function
+      async function deleteReview(reviewId) {
+        if (confirm("Are you sure you want to delete this review?")) {
+          try {
+            await db.collection("reviews").doc(reviewId).delete();
+            showNotification("Review deleted successfully", "success");
+            await loadReviews();
+            await updateCounts();
+          } catch (error) {
+            console.error("Error deleting review:", error);
+            showNotification("Error deleting review", "error");
+          }
+        }
+      }
+
+      async function loadProducts() {
+        try {
+          const snapshot = await db
+            .collection("products")
+            .orderBy("timestamp", "desc")
+            .get({ source: auth.currentUser ? "default" : "cache" });
+
+          const productsTableBody =
+            document.getElementById("productsTableBody");
+          if (!productsTableBody) return;
+
+          productsTableBody.innerHTML = "";
+
+          if (snapshot.empty) {
+            productsTableBody.innerHTML =
+              '<tr><td colspan="8" class="text-center">No products found</td></tr>';
+            return;
+          }
+
+          snapshot.forEach((doc) => {
+            const product = { id: doc.id, ...doc.data() };
+            const imageCount = product.images
+              ? product.images.split("\n").filter((img) => img.trim()).length
+              : 0;
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+        <td>${escapeHtml(product.title)}</td>
+        <td>$${parseFloat(product.price || 0).toFixed(2)}</td>
+        <td>${escapeHtml(product.previewType || "Images")}</td>
+        <td>${escapeHtml(product.gameType || "-")}</td>
+        <td>${product.views || 0}</td>
+        <td>${product.purchases || 0}</td>
+        <td>${
+          product.status !== false
+            ? '<span class="badge badge-success">Visible</span>'
+            : '<span class="badge badge-danger">Hidden</span>'
+        }</td>
+        <td>
+          <button class="action-btn" onclick="editProduct('${
+            product.id
+          }')" title="Edit">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="action-btn delete" onclick="deleteProduct('${
+            product.id
+          }')" title="Delete">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      `;
+            productsTableBody.appendChild(row);
+          });
+        } catch (error) {
+          console.error("Error loading products:", error);
+          showNotification(
+            "Error loading products. Please check your permissions.",
+            "error"
+          );
+        }
+      }
+
+      async function saveProduct() {
+        try {
+          const productData = {
+            title: document.getElementById("productTitle").value.trim(),
+            price:
+              parseFloat(document.getElementById("productPrice").value) || 0,
+            description: document
+              .getElementById("productDescription")
+              .value.trim(),
+            previewType: document.getElementById("productPreviewType").value,
+            gameType: document.getElementById("productGameType").value.trim(),
+            views: parseInt(document.getElementById("productViews").value) || 0,
+            purchases:
+              parseInt(document.getElementById("productPurchases").value) || 0,
+            link: document.getElementById("productLink").value.trim(),
+            images: document.getElementById("productImages").value.trim(),
+            status: document.getElementById("productStatus").checked,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+
+          // Validation
+          if (!productData.title || !productData.description) {
+            alert("Please fill in all required fields (Title, Description)");
+            return;
+          }
+
+          if (editingProductId) {
+            // Update existing product
+            await db
+              .collection("products")
+              .doc(editingProductId)
+              .update(productData);
+            showNotification("Product updated successfully!", "success");
+            editingProductId = null;
+          } else {
+            // Add new product
+            await db.collection("products").add(productData);
+            showNotification("Product added successfully!", "success");
+          }
+
+          // Clear form
+          clearProductForm();
+          await loadProducts();
+          await updateCounts();
+        } catch (error) {
+          console.error("Error saving product:", error);
+          showNotification("Error saving product. Please try again.", "error");
+        }
+      }
+
+      function clearProductForm() {
+        document.getElementById("productTitle").value = "";
+        document.getElementById("productPrice").value = "";
+        document.getElementById("productDescription").value = "";
+        document.getElementById("productPreviewType").value = "Images";
+        document.getElementById("productGameType").value = "";
+        document.getElementById("productViews").value = "0";
+        document.getElementById("productPurchases").value = "0";
+        document.getElementById("productLink").value = "";
+        document.getElementById("productImages").value = "";
+        document.getElementById("productStatus").checked = true;
+        editingProductId = null;
+      }
+
+      async function editProduct(productId) {
+        try {
+          const doc = await db.collection("products").doc(productId).get();
+          if (doc.exists) {
+            const product = doc.data();
+
+            // Fill form with existing data
+            document.getElementById("productTitle").value = product.title || "";
+            document.getElementById("productPrice").value = product.price || "";
+            document.getElementById("productDescription").value =
+              product.description || "";
+            document.getElementById("productPreviewType").value =
+              product.previewType || "Images";
+            document.getElementById("productGameType").value =
+              product.gameType || "";
+            document.getElementById("productViews").value =
+              product.views || "0";
+            document.getElementById("productPurchases").value =
+              product.purchases || "0";
+            document.getElementById("productLink").value = product.link || "";
+            document.getElementById("productImages").value =
+              product.images || "";
+            document.getElementById("productStatus").checked =
+              product.status !== false;
+
+            editingProductId = productId;
+
+            // Scroll to form
+            document
+              .querySelector(".card")
+              .scrollIntoView({ behavior: "smooth" });
+
+            showNotification("Product loaded for editing", "info");
+          }
+        } catch (error) {
+          console.error("Error loading product for editing:", error);
+          showNotification("Error loading product for editing", "error");
+        }
+      }
+
+      async function deleteProduct(productId) {
+        if (confirm("Are you sure you want to delete this product?")) {
+          try {
+            await db.collection("products").doc(productId).delete();
+            showNotification("Product deleted successfully", "success");
+            await loadProducts();
+            await updateCounts();
+          } catch (error) {
+            console.error("Error deleting product:", error);
+            showNotification("Error deleting product", "error");
+          }
+        }
+      }
+
+      // Delete image from portfolio
+      async function deleteImage(event) {
+        if (!confirm("Are you sure you want to delete this image?")) {
+          return;
+        }
+
+        const portfolioSlug =
+          event.currentTarget.getAttribute("data-portfolio");
+        const imageKey = event.currentTarget.getAttribute("data-key");
+
+        try {
+          const portfolioRef = db.collection("portfolios").doc(portfolioSlug);
+
+          // First get the current data to check if this is the last image
+          const doc = await portfolioRef.get();
+          if (!doc.exists) {
+            throw new Error("Portfolio not found");
+          }
+
+          // Create update data
+          const updateData = {
+            [imageKey]: firebase.firestore.FieldValue.delete(),
+            lastEdited: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+
+          await portfolioRef.update(updateData);
+
+          // Check if this was the last image in the portfolio
+          const updatedDoc = await portfolioRef.get();
+          const hasImages = Object.keys(updatedDoc.data()).some((key) =>
+            key.startsWith("image")
+          );
+
+          // If no images left, delete the entire portfolio
+          if (!hasImages) {
+            await portfolioRef.delete();
+          }
+
+          // Refresh the UI
+          loadImages();
+          initPortfolioDropdowns();
+
+          alert("Image deleted successfully!");
+        } catch (error) {
+          console.error("Error deleting image:", error);
+          alert("Error deleting image: " + error.message);
+        }
+      }
+      // Copy image URL function
+      function copyImageUrl(url) {
+        navigator.clipboard
+          .writeText(url)
+          .then(() => {
+            showNotification("Image URL copied to clipboard", "success");
+          })
+          .catch(() => {
+            showNotification("Failed to copy URL", "error");
+          });
+      }
+      // Add this to your initializeEventListeners() function
+      document
+        .getElementById("sidebarLogoutBtn")
+        ?.addEventListener("click", (e) => {
+          e.preventDefault();
+          logout();
+        });
+      // Clear forms
+      function clearReviewForm() {
+        document.getElementById("reviewName").value = "";
+        document.getElementById("reviewService").value = "";
+        document.getElementById("reviewDate").value = "";
+        document.getElementById("reviewStars").value = "5";
+        document.getElementById("reviewDescription").value = "";
+        document.getElementById("reviewImage").value = "";
+        editingReviewId = null;
+      }
+
+      function clearProductForm() {
+        document.getElementById("productTitle").value = "";
+        document.getElementById("productPrice").value = "";
+        document.getElementById("productDescription").value = "";
+        document.getElementById("productPreviewType").value = "image";
+        document.getElementById("productLink").value = "";
+        document.getElementById("productImages").value = "";
+        editingProductId = null;
+      }
+
+      // Utility functions
+      function escapeHtml(text) {
+        const map = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        };
+        return text.replace(/[&<>"']/g, function (m) {
+          return map[m];
+        });
+      }
+
+      function isValidUrl(string) {
+        try {
+          new URL(string);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function showNotification(message, type = "info") {
+        // Create notification element if it doesn't exist
+        let notification = document.getElementById("notification");
+        if (!notification) {
+          notification = document.createElement("div");
+          notification.id = "notification";
+          notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+          `;
+          document.body.appendChild(notification);
+        }
+
+        // Set notification style based on type
+        const colors = {
+          success: "#10b981",
+          error: "#ef4444",
+          info: "#3b82f6",
+          warning: "#f59e0b",
+        };
+
+        notification.style.backgroundColor = colors[type] || colors.info;
+        notification.textContent = message;
+        notification.style.opacity = "1";
+
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+          notification.style.opacity = "0";
+        }, 3000);
+      }
+
+      // Tab switching functionality
+      function switchTab(tabName) {
+        // Remove active class from all menu items and tab contents
+        document
+          .querySelectorAll(".menu-item")
+          .forEach((item) => item.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((tab) => tab.classList.remove("active"));
+
+        // Add active class to selected menu item and tab content
+        document
+          .querySelector(`[data-tab="${tabName}"]`)
+          .classList.add("active");
+        document.getElementById(`${tabName}-tab`).classList.add("active");
+      }
+
+      // Initialize tab switching
+      document.addEventListener("DOMContentLoaded", function () {
+        // Menu item click handlers
+        document.querySelectorAll(".menu-item").forEach((item) => {
+          item.addEventListener("click", function (e) {
+            e.preventDefault();
+            const tabName = this.getAttribute("data-tab");
+            switchTab(tabName);
+          });
+        });
+
+        // Sidebar toggle functionality
+        const openSidebarBtn = document.querySelector(".open-sidebar");
+        const closeSidebarBtn = document.querySelector(".close-sidebar");
+        const sidebarOverlay = document.querySelector(".sidebar-overlay");
+        const sidebar = document.querySelector(".sidebar");
+
+        function openSidebar() {
+          sidebar.classList.add("active");
+          sidebarOverlay.classList.add("active");
+        }
+
+        function closeSidebar() {
+          sidebar.classList.remove("active");
+          sidebarOverlay.classList.remove("active");
+        }
+
+        if (openSidebarBtn)
+          openSidebarBtn.addEventListener("click", openSidebar);
+        if (closeSidebarBtn)
+          closeSidebarBtn.addEventListener("click", closeSidebar);
+        if (sidebarOverlay)
+          sidebarOverlay.addEventListener("click", closeSidebar);
+
+        // Global search functionality
+
+        // Set today's date as default for review date
+        const reviewDateInput = document.getElementById("reviewDate");
+        if (reviewDateInput) {
+          reviewDateInput.value = new Date().toISOString().split("T")[0];
+        }
+
+        // Add event listeners for save buttons
+        document.querySelectorAll(".btn-primary").forEach((btn) => {
+          if (btn.textContent.includes("Save Review")) {
+            btn.addEventListener("click", saveReview);
+          } else if (btn.textContent.includes("Save Product")) {
+            btn.addEventListener("click", saveProduct);
+          } else if (btn.textContent.includes("Add to Library")) {
+            btn.addEventListener("click", saveImage);
+          } else if (btn.textContent.includes("Update Status")) {
+            btn.addEventListener("click", saveStatus);
+          } else if (btn.textContent.includes("Save Social Links")) {
+            btn.addEventListener("click", saveSocial);
+          }
+        });
+
+        // Add Review button
+        document
+          .getElementById("addReviewBtn")
+          ?.addEventListener("click", () => {
+            clearReviewForm();
+            switchTab("reviews");
+          });
+
+        // Add Product button
+        document
+          .getElementById("addProductBtn")
+          ?.addEventListener("click", () => {
+            clearProductForm();
+            switchTab("products");
+          });
+
+        // Add Image button
+        document
+          .getElementById("addImageBtn")
+          ?.addEventListener("click", () => {
+            document.getElementById("imageUrl").value = "";
+            switchTab("images");
+          });
+
+        // Prevent form submissions
+        document.querySelectorAll("form").forEach((form) => {
+          form.addEventListener("submit", (e) => e.preventDefault());
+        });
+      });
+
+      // SOCIAL!
+
+      const socialLinksContainer = document.getElementById(
+        "socialLinksContainer"
+      );
+      const socialFormContainer = document.getElementById(
+        "socialFormContainer"
+      );
+      const addSocialBtn = document.getElementById("addSocialBtn");
+      const saveSocialBtn = document.getElementById("saveSocialBtn");
+      const cancelSocialBtn = document.getElementById("cancelSocialBtn");
+
+      // Form fields
+      const platformNameInput = document.getElementById("socialPlatformName");
+      const profileUrlInput = document.getElementById("socialProfileUrl");
+      const iconUrlInput = document.getElementById("socialIconUrl");
+      const cssClassInput = document.getElementById("socialCssClass");
+      const editIdInput = document.getElementById("socialEditId");
+
+      // Current editing state
+      let isEditing = false;
+      let currentSocialLinks = {};
+
+      // Load social media from Firestore
+      async function loadSocialMedia() {
+        try {
+          const doc = await db.collection("settings").doc("social").get();
+
+          if (doc.exists) {
+            currentSocialLinks = doc.data();
+            renderSocialLinks(currentSocialLinks);
+          } else {
+            console.log("No social links found. Creating empty document.");
+            await db.collection("settings").doc("social").set({});
+            currentSocialLinks = {};
+            renderSocialLinks({});
+          }
+        } catch (error) {
+          console.error("Error loading social media:", error);
+          showNotification("Error loading social media", "error");
+        }
+      }
+
+      // Render social links to the page
+      function renderSocialLinks(links) {
+        socialLinksContainer.innerHTML = "";
+
+        if (Object.keys(links).length === 0) {
+          socialLinksContainer.innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-info">No social links added yet. Click "Add New Link" to get started.</div>
+      </div>
+    `;
+          return;
+        }
+
+        Object.entries(links).forEach(([id, link]) => {
+          const linkElement = document.createElement("div");
+          linkElement.className = `col-md-4 mb-3 social-link ${
+            link.cssClass || ""
+          }`;
+          linkElement.id = `social-${id}`;
+
+          const icon = link.iconUrl
+            ? `<img src="${link.iconUrl}" alt="${link.platform}" class="social-icon" style="width: 24px; height: 24px;">`
+            : `<i class="fas fa-link"></i>`;
+
+          linkElement.innerHTML = `
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="card-title mb-1">${link.platform}</h5>
+              <a href="${
+                link.url
+              }" target="_blank" class="card-text text-muted">${truncateUrl(
+            link.url
+          )}</a>
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-sm btn-outline-primary edit-social" data-id="${id}">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger delete-social" data-id="${id}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+          socialLinksContainer.appendChild(linkElement);
+        });
+      }
+
+      // Helper function to truncate URLs for display
+      function truncateUrl(url) {
+        if (url.length > 30) {
+          return url.substring(0, 27) + "...";
+        }
+        return url;
+      }
+
+      // Show the add/edit form
+      function showSocialForm(linkData = null) {
+        isEditing = linkData !== null;
+
+        if (isEditing) {
+          platformNameInput.value = linkData.platform;
+          profileUrlInput.value = linkData.url;
+          iconUrlInput.value = linkData.iconUrl || "";
+          cssClassInput.value = linkData.cssClass || "";
+          editIdInput.value = linkData.id;
+          saveSocialBtn.innerHTML = '<i class="fas fa-save"></i> Update Link';
+        } else {
+          platformNameInput.value = "";
+          profileUrlInput.value = "";
+          iconUrlInput.value = "";
+          cssClassInput.value = "";
+          editIdInput.value = "";
+          saveSocialBtn.innerHTML = '<i class="fas fa-save"></i> Save Link';
+        }
+
+        socialFormContainer.style.display = "block";
+        window.scrollTo({
+          top: socialFormContainer.offsetTop - 20,
+          behavior: "smooth",
+        });
+      }
+
+      // Hide the form
+      function hideSocialForm() {
+        socialFormContainer.style.display = "none";
+        isEditing = false;
+      }
+
+      // Save social link to Firestore
+      async function saveSocialLink() {
+        const platform = platformNameInput.value.trim();
+        const url = profileUrlInput.value.trim();
+        const iconUrl = iconUrlInput.value.trim();
+        const cssClass = cssClassInput.value.trim();
+        const id = editIdInput.value || generateId();
+
+        if (!platform || !url) {
+          showNotification("Platform name and URL are required", "error");
+          return;
+        }
+
+        try {
+          const linkData = {
+            platform,
+            url,
+            ...(iconUrl && { iconUrl }),
+            ...(cssClass && { cssClass }),
+          };
+
+          // Update local state
+          currentSocialLinks[id] = linkData;
+
+          // Update Firestore
+          await db
+            .collection("settings")
+            .doc("social")
+            .update({
+              [id]: linkData,
+            });
+
+          renderSocialLinks(currentSocialLinks);
+          hideSocialForm();
+          showNotification(
+            `Link ${isEditing ? "updated" : "added"} successfully!`,
+            "success"
+          );
+        } catch (error) {
+          console.error("Error saving social link:", error);
+          showNotification("Error saving social link", "error");
+        }
+      }
+
+      // Delete social link
+      async function deleteSocialLink(id) {
+        if (!confirm("Are you sure you want to delete this link?")) return;
+
+        try {
+          // Update Firestore
+          await db
+            .collection("settings")
+            .doc("social")
+            .update({
+              [id]: firebase.firestore.FieldValue.delete(),
+            });
+
+          // Update local state
+          delete currentSocialLinks[id];
+
+          renderSocialLinks(currentSocialLinks);
+          showNotification("Link deleted successfully!", "success");
+        } catch (error) {
+          console.error("Error deleting social link:", error);
+          showNotification("Error deleting social link", "error");
+        }
+      }
+
+      // Generate a simple ID for new links
+      function generateId() {
+        return "link-" + Math.random().toString(36).substr(2, 9);
+      }
+
+      // Event listeners
+      addSocialBtn.addEventListener("click", () => showSocialForm());
+      saveSocialBtn.addEventListener("click", saveSocialLink);
+      cancelSocialBtn.addEventListener("click", hideSocialForm);
+
+      // Delegated event listeners for edit/delete buttons
+      socialLinksContainer.addEventListener("click", (e) => {
+        if (e.target.closest(".edit-social")) {
+          const id = e.target.closest(".edit-social").dataset.id;
+          const linkData = { ...currentSocialLinks[id], id };
+          showSocialForm(linkData);
+        }
+
+        if (e.target.closest(".delete-social")) {
+          const id = e.target.closest(".delete-social").dataset.id;
+          deleteSocialLink(id);
+        }
+      });
+
+      // Helper function for notifications (you can replace with your own)
+      function showNotification(message, type = "info") {
+        // Implement your notification system here
+        console.log(`${type.toUpperCase()}: ${message}`);
+        alert(`${type.toUpperCase()}: ${message}`);
+      }
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", loadSocialMedia);
+    </script>
+    <script src="search.js"></script>
+  </body>
+</html>
