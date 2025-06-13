@@ -134,14 +134,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       snapshot.docs.forEach((doc) => {
-        const portfolio = { id: doc.id, ...doc.data() };
+        const portfolio = doc.data();
         const option = document.createElement("option");
-        option.value = portfolio.id;
+        option.value = portfolio.name;
         option.textContent = portfolio.name;
         imagePortfolioSelect.appendChild(option);
 
         const filterOption = document.createElement("option");
-        filterOption.value = portfolio.id;
+        filterOption.value = portfolio.name;
         filterOption.textContent = portfolio.name;
         portfolioFilterSelect.appendChild(filterOption);
       });
@@ -305,14 +305,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function loadImages(portfolioId = "all") {
+  async function loadImages(portfolioName = "all") {
     showLoadingState();
 
     try {
       let query = db.collection("images").orderBy("timestamp", "desc");
 
-      if (portfolioId && portfolioId !== "all") {
-        query = query.where("portfolioId", "==", portfolioId);
+      if (portfolioName && portfolioName !== "all") {
+        query = query.where("portfolioName", "==", portfolioName);
       }
 
       const snapshot = await query.get();
@@ -344,18 +344,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Apply category filter
   function applyCategoryFilter() {
     const category = categoryFilterSelect.value;
-    const portfolioId = portfolioFilterSelect.value;
+    const portfolioName = portfolioFilterSelect.value;
 
-    if (category === "all" && (portfolioId === "all" || !portfolioId)) {
+    if (category === "all" && (portfolioName === "all" || !portfolioName)) {
       loadImages();
       return;
     }
 
     let filteredImages = [...currentImages];
 
-    if (portfolioId && portfolioId !== "all") {
+    if (portfolioName && portfolioName !== "all") {
       filteredImages = filteredImages.filter(
-        (img) => img.portfolioId === portfolioId
+        (img) => img.portfolioName === portfolioName
       );
     }
 
@@ -431,12 +431,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Save image (create or update)
   async function saveImage() {
-    const portfolioId = imagePortfolioSelect.value;
-    const newPortfolioName = newPortfolioNameInput.value;
-    const title = imageTitleInput.value;
-    const imageUrl = imageUrlInput.value;
+    const portfolioSelection = imagePortfolioSelect.value;
+    const newPortfolioName = newPortfolioNameInput.value.trim();
+    const title = imageTitleInput.value.trim();
+    const imageUrl = imageUrlInput.value.trim();
     const category = imageCategorySelect.value;
-    const description = imageDescriptionInput.value;
+    const description = imageDescriptionInput.value.trim();
 
     // Validate inputs
     if (!title) {
@@ -445,39 +445,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!imageUrl) {
-      showNotification(
-        "Please provide an image URL or upload a file",
-        "warning"
-      );
+      showNotification("Please provide an image URL", "warning");
       return;
     }
 
-    let actualPortfolioId = portfolioId;
+    let portfolioName = portfolioSelection;
 
     // Handle new portfolio creation
-    if (portfolioId === "new") {
+    if (portfolioSelection === "new") {
       if (!newPortfolioName) {
         showNotification("Please enter a new portfolio name", "warning");
         return;
       }
 
-      try {
-        const newPortfolioRef = await db.collection("portfolios").add({
-          name: newPortfolioName,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+      // Check if portfolio already exists
+      const existingPortfolio = await db
+        .collection("portfolios")
+        .where("name", "==", newPortfolioName)
+        .get();
 
-        actualPortfolioId = newPortfolioRef.id;
-        showNotification("Portfolio created successfully", "success");
-        await loadPortfolios(); // Refresh portfolio list
-        imagePortfolioSelect.value = actualPortfolioId;
-        newPortfolioGroup.style.display = "none";
-      } catch (error) {
-        console.error("Error creating portfolio:", error);
-        showNotification("Error creating portfolio", "error");
+      if (!existingPortfolio.empty) {
+        showNotification("Portfolio name already exists", "warning");
         return;
       }
-    } else if (!portfolioId) {
+
+      // Create new portfolio
+      await db.collection("portfolios").add({
+        name: newPortfolioName,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      portfolioName = newPortfolioName;
+      showNotification("Portfolio created successfully", "success");
+      await loadPortfolios(); // Refresh portfolio list
+      imagePortfolioSelect.value = portfolioName;
+      newPortfolioGroup.style.display = "none";
+    } else if (!portfolioSelection) {
       showNotification("Please select a portfolio", "warning");
       return;
     }
@@ -488,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
       imageUrl,
       category,
       description,
-      portfolioId: actualPortfolioId,
+      portfolioName,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
@@ -513,10 +516,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Create new portfolio
+  // Create new portfolio via modal
   async function createPortfolio() {
-    const name = portfolioNameInput.value;
-    const description = portfolioDescriptionInput.value;
+    const name = portfolioNameInput.value.trim();
+    const description = portfolioDescriptionInput.value.trim();
 
     if (!name) {
       showNotification("Please enter a portfolio name", "warning");
@@ -524,6 +527,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
+      // Check if portfolio already exists
+      const existingPortfolio = await db
+        .collection("portfolios")
+        .where("name", "==", name)
+        .get();
+
+      if (!existingPortfolio.empty) {
+        showNotification("Portfolio name already exists", "warning");
+        return;
+      }
+
       await db.collection("portfolios").add({
         name,
         description,
@@ -540,47 +554,42 @@ document.addEventListener("DOMContentLoaded", () => {
       showNotification("Error creating portfolio", "error");
     }
   }
+
   // Delete current portfolio
   async function deleteCurrentPortfolio() {
-    const portfolioId = imagePortfolioSelect.value;
+    const portfolioName = imagePortfolioSelect.value;
 
-    // Validation check
-    if (!portfolioId || portfolioId === "new") {
+    if (!portfolioName || portfolioName === "new") {
       showNotification("Please select a portfolio to delete", "warning");
       return;
     }
 
-    // Get portfolio name for confirmation message
-    let portfolioName = "this portfolio";
-    try {
-      const portfolioDoc = await db
-        .collection("portfolios")
-        .doc(portfolioId)
-        .get();
-      if (portfolioDoc.exists) {
-        portfolioName = `"${portfolioDoc.data().name}"`;
-      }
-    } catch (error) {
-      console.error("Error fetching portfolio:", error);
-    }
-
-    // Confirmation dialog
     if (
       !confirm(
-        `Are you sure you want to delete ${portfolioName} and all its images?`
+        `Are you sure you want to delete "${portfolioName}" and all its images?`
       )
     ) {
       return;
     }
 
     try {
-      // First check if portfolio has any images
-      const imagesSnapshot = await db
-        .collection("images")
-        .where("portfolioId", "==", portfolioId)
+      // First find the portfolio document to delete
+      const portfolioQuery = await db
+        .collection("portfolios")
+        .where("name", "==", portfolioName)
         .get();
 
-      // Delete images if any exist
+      if (portfolioQuery.empty) {
+        showNotification("Portfolio not found in database", "error");
+        return;
+      }
+
+      // Delete all images in this portfolio
+      const imagesSnapshot = await db
+        .collection("images")
+        .where("portfolioName", "==", portfolioName)
+        .get();
+
       if (!imagesSnapshot.empty) {
         const batch = db.batch();
         imagesSnapshot.forEach((doc) => {
@@ -589,17 +598,14 @@ document.addEventListener("DOMContentLoaded", () => {
         await batch.commit();
       }
 
-      // Then delete the portfolio itself
-      await db.collection("portfolios").doc(portfolioId).delete();
+      // Then delete the portfolio document
+      await db.collection("portfolios").doc(portfolioQuery.docs[0].id).delete();
 
-      // Success notification
-      const imageCountMessage = imagesSnapshot.empty
-        ? "Portfolio with no images deleted successfully"
-        : `Portfolio and ${imagesSnapshot.size} image(s) deleted successfully`;
+      showNotification(
+        `Deleted "${portfolioName}" and ${imagesSnapshot.size} image(s)`,
+        "success"
+      );
 
-      showNotification(imageCountMessage, "success");
-
-      // Clean up and refresh UI
       clearImageForm();
       await loadPortfolios();
       loadImages();
@@ -608,60 +614,6 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error deleting portfolio:", error);
       showNotification("Error deleting portfolio", "error");
     }
-  }
-
-  // Add a new category
-  function addCategory() {
-    const newCategoryName = document.querySelector("#newCategoryName").value;
-
-    if (!newCategoryName || newCategoryName.trim() === "") {
-      showNotification("Please enter a category name", "warning");
-      return;
-    }
-
-    // Check if already exists in select
-    const existingOptions = Array.from(imageCategorySelect.options).map(
-      (opt) => opt.value
-    );
-    if (existingOptions.includes(newCategoryName)) {
-      showNotification("Category already exists", "warning");
-      return;
-    }
-
-    // Add to all selects
-    const option = document.createElement("option");
-    option.value = newCategoryName;
-    option.textContent = newCategoryName;
-
-    // Insert before the "Add New" option in main select
-    const addNewOption = imageCategorySelect.querySelector(
-      'option[value="add_new"]'
-    );
-    if (addNewOption) {
-      imageCategorySelect.insertBefore(option, addNewOption);
-    } else {
-      imageCategorySelect.appendChild(option);
-    }
-
-    // Add to filter select
-    const filterOption = option.cloneNode(true);
-    const filterAddNewOption = categoryFilterSelect.querySelector(
-      'option[value="add_new"]'
-    );
-    if (filterAddNewOption) {
-      categoryFilterSelect.insertBefore(filterOption, filterAddNewOption);
-    } else {
-      categoryFilterSelect.appendChild(filterOption);
-    }
-
-    // Add to edit select
-    const editOption = option.cloneNode(true);
-    editCategorySelect.appendChild(editOption);
-
-    // Clear the input field
-    document.querySelector("#newCategoryName").value = "";
-
-    showNotification("Category added successfully", "success");
   }
 
   // Delete selected images
@@ -740,7 +692,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const image = doc.data();
 
       // Populate the form with the image data
-      imagePortfolioSelect.value = image.portfolioId || "";
+      imagePortfolioSelect.value = image.portfolioName || "";
       newPortfolioGroup.style.display = "none";
       imageTitleInput.value = image.title;
       imageUrlInput.value = ""; // Clear URL so you can enter a new one
@@ -775,7 +727,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const image = { id: doc.id, ...doc.data() };
       editingImageId = id;
 
-      imagePortfolioSelect.value = image.portfolioId || "";
+      imagePortfolioSelect.value = image.portfolioName || "";
       newPortfolioGroup.style.display = "none";
       imageTitleInput.value = image.title;
       imageUrlInput.value = image.imageUrl;
