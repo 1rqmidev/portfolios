@@ -8,15 +8,13 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
 function getCurrentPortfolioName() {
-  const pathParts = window.location.pathname.split("/").filter(Boolean); // removes empty strings
+  const pathParts = window.location.pathname.split("/").filter(Boolean);
   console.log(pathParts);
-  // Look for 'portfolios' in the path and get the part after it
   const portfolioIndex = pathParts.indexOf("portfolios");
   if (portfolioIndex !== -1 && pathParts.length > portfolioIndex + 1) {
     return pathParts[portfolioIndex + 1].toLowerCase();
   }
-
-  return null; // not found
+  return null;
 }
 
 function formatRelativeTime(date) {
@@ -47,18 +45,19 @@ function isRecentlyUpdated(editDate) {
 }
 
 function formatDateForAttribute(date) {
-  return date.toISOString().split("T")[0]; // YYYY-MM-DD format
+  return date.toISOString().split("T")[0];
 }
 
 async function loadPortfolio() {
+  let loading;
   try {
-    let currentPage = getCurrentPortfolioName();
-    // Remove this line as it overrides the detected portfolio name
-    // currentPage = "mc-build-portfolio";
-    const loading = document.createElement("div");
+    const currentPage = getCurrentPortfolioName();
+
+    loading = document.createElement("div");
     loading.className = "loading-indicator";
     loading.innerHTML = `<div class="spinner"></div><p>Loading portfolio...</p>`;
     document.body.appendChild(loading);
+
     if (!currentPage) {
       console.warn("No portfolio name found in URL path");
       loading.remove();
@@ -67,18 +66,20 @@ async function loadPortfolio() {
 
     console.log("Loading portfolio:", currentPage);
 
-    const doc = await firebase
+    // Get portfolio document
+    const portfolioDoc = await firebase
       .firestore()
       .collection("portfolios")
       .doc(currentPage)
       .get();
 
-    if (!doc.exists) {
+    if (!portfolioDoc.exists) {
       console.warn(`Portfolio not found: ${currentPage}`);
+      loading.remove();
       return;
     }
 
-    const portfolioData = doc.data();
+    const portfolioData = portfolioDoc.data();
     const section = document.createElement("div");
     section.className = "section-gallery";
 
@@ -95,41 +96,43 @@ async function loadPortfolio() {
         .join(" ");
 
     // Last updated time (relative)
-    if (portfolioData.lastEdited) {
+    if (portfolioData.createdAt) {
       const lastUpdated = document.createElement("p");
       lastUpdated.className = "last-updated";
-      lastUpdated.textContent = `Updated ${formatRelativeTime(
-        portfolioData.lastEdited.toDate()
+      lastUpdated.textContent = `Created ${formatRelativeTime(
+        portfolioData.createdAt.toDate()
       )}`;
       section.appendChild(lastUpdated);
     }
 
-    // Process images
+    // Get all images from the subcollection
+    const imagesSnapshot = await firebase
+      .firestore()
+      .collection("portfolios")
+      .doc(currentPage)
+      .collection("images")
+      .get();
+
+    // Process images into categories
     const categories = {};
-    Object.entries(portfolioData).forEach(([key, value]) => {
-      if (["displayName", "createdAt", "lastEdited"].includes(key)) return;
+    imagesSnapshot.forEach((doc) => {
+      const imageData = doc.data();
+      const category = imageData.category || "Uncategorized";
+      categories[category] = categories[category] || [];
 
-      if (typeof value === "object" && value?.url) {
-        const category = value.category || "Uncategorized";
-        categories[category] = categories[category] || [];
+      const editDate =
+        imageData.updatedAt?.toDate() ||
+        imageData.timestamp?.toDate() ||
+        new Date();
 
-        const editDate =
-          value.lastEdited?.toDate() ||
-          new Date(value.uploadedAt || Date.now());
-
-        categories[category].push({
-          url: value.url,
-          title:
-            value.title ||
-            key
-              .replace(/image/i, "")
-              .replace(/([A-Z])/g, " $1")
-              .trim(),
-          isNew: isRecentlyUpdated(editDate),
-          date: formatDateForAttribute(editDate),
-          fullDate: editDate.toLocaleDateString(), // For tooltip display
-        });
-      }
+      categories[category].push({
+        url: imageData.imageUrl,
+        title: imageData.title || "Untitled",
+        description: imageData.description || "",
+        isNew: isRecentlyUpdated(editDate),
+        date: formatDateForAttribute(editDate),
+        fullDate: editDate.toLocaleDateString(),
+      });
     });
 
     // Build gallery
@@ -157,11 +160,16 @@ async function loadPortfolio() {
           ? `<span class="new-badge" data-tooltip="Added: ${image.fullDate}">NEW</span>`
           : "";
 
+        const description = image.description
+          ? `<p class="image-description">${image.description}</p>`
+          : "";
+
         item.innerHTML = `
-    ${newBadge}
-    <h3>${image.title}</h3>
-    <img  src="${image.url}" alt="${image.title}" />
-  `;
+          ${newBadge}
+          <h3>${image.title}</h3>
+          <img src="${image.url}" alt="${image.title}" />
+          ${description}
+        `;
 
         return item;
       }
@@ -181,7 +189,7 @@ async function loadPortfolio() {
           tempImg.onerror = () => {
             imageItems.push({
               image,
-              width: 800, // fallback dimensions
+              width: 800,
               height: 600,
             });
             resolve();
@@ -190,18 +198,12 @@ async function loadPortfolio() {
         });
       }
 
-      // Calculate column width (48% of gallery-wrapper's 90% width)
       const columnWidth = window.innerWidth * 0.9 * 0.48;
-
-      // Calculate total height for each item (image + title + badge + margin)
       const itemHeights = imageItems.map((item) => {
-        // Calculate rendered image height based on column width
         const renderedHeight = (item.height * columnWidth) / item.width;
-        // Add 20px margin for each item
-        return renderedHeight + 20;
+        return renderedHeight + (item.image.description ? 60 : 40); // Extra space for description
       });
 
-      // Sort by descending height for better distribution
       const sortedItems = imageItems
         .map((item, index) => ({ item, height: itemHeights[index] }))
         .sort((a, b) => b.height - a.height);
@@ -224,18 +226,17 @@ async function loadPortfolio() {
       section.appendChild(galleryWrapper);
     }
 
-    // Insert before footer or at end of body
     const footer = document.querySelector("footer");
     (footer?.parentNode || document.body).insertBefore(section, footer || null);
     loading.remove();
   } catch (error) {
-    loading.remove();
     console.error("Error loading portfolio:", error);
+    if (loading) loading.remove();
     const errorDiv = document.createElement("div");
+    errorDiv.className = "error-message";
     errorDiv.textContent = "Failed to load portfolio. Please try again later.";
     document.body.appendChild(errorDiv);
   }
 }
 
-// Fix: Pass the function reference, don't call it immediately
 document.addEventListener("DOMContentLoaded", loadPortfolio);

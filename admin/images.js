@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
       '<option value="all">All Portfolios</option>';
 
     try {
-      const snapshot = await db.collection("portfolios").orderBy("name").get();
+      const snapshot = await db.collection("portfolios").get();
       totalPortfoliosSpan.textContent = snapshot.size;
 
       if (snapshot.empty) {
@@ -133,16 +133,23 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      const portfolioNames = [];
       snapshot.docs.forEach((doc) => {
-        const portfolio = doc.data();
+        portfolioNames.push(doc.id);
+      });
+
+      // Sort alphabetically
+      portfolioNames.sort();
+
+      portfolioNames.forEach((portfolioName) => {
         const option = document.createElement("option");
-        option.value = portfolio.name;
-        option.textContent = portfolio.name;
+        option.value = portfolioName;
+        option.textContent = portfolioName;
         imagePortfolioSelect.appendChild(option);
 
         const filterOption = document.createElement("option");
-        filterOption.value = portfolio.name;
-        filterOption.textContent = portfolio.name;
+        filterOption.value = portfolioName;
+        filterOption.textContent = portfolioName;
         portfolioFilterSelect.appendChild(filterOption);
       });
 
@@ -165,19 +172,22 @@ document.addEventListener("DOMContentLoaded", () => {
         '<option value="">Select category...</option>';
 
       // Get categories from dedicated collection
-      const categoriesSnapshot = await db
-        .collection("categories")
-        .orderBy("name")
-        .get();
+      const categoriesSnapshot = await db.collection("categories").get();
 
       if (!categoriesSnapshot.empty) {
+        const categoryNames = [];
         categoriesSnapshot.forEach((doc) => {
-          const category = doc.data().name;
+          categoryNames.push(doc.id);
+        });
 
+        // Sort alphabetically
+        categoryNames.sort();
+
+        categoryNames.forEach((categoryName) => {
           // Add to main category select
           const option = document.createElement("option");
-          option.value = category;
-          option.textContent = category;
+          option.value = categoryName;
+          option.textContent = categoryName;
           imageCategorySelect.appendChild(option);
 
           // Add to filter select
@@ -214,19 +224,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       // Check if category already exists
-      const existingCategory = await db
-        .collection("categories")
-        .where("name", "==", newCategoryName)
-        .get();
+      const docRef = db.collection("categories").doc(newCategoryName);
+      const doc = await docRef.get();
 
-      if (!existingCategory.empty) {
+      if (doc.exists) {
         showNotification("Category already exists", "warning");
         return;
       }
 
-      // Add to Firestore
-      await db.collection("categories").add({
-        name: newCategoryName,
+      // Add to Firestore with the category name as document ID
+      await docRef.set({
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
 
@@ -261,31 +268,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // First find the category document to delete
-      const categoryQuery = await db
-        .collection("categories")
-        .where("name", "==", categoryToDelete)
-        .get();
-
-      if (categoryQuery.empty) {
-        showNotification("Category not found in database", "error");
-        return;
-      }
-
-      // Delete the category document (there should only be one)
-      await db.collection("categories").doc(categoryQuery.docs[0].id).delete();
+      // First delete the category document
+      await db.collection("categories").doc(categoryToDelete).delete();
 
       // Update all images that had this category to remove it
-      const imagesWithCategory = await db
-        .collection("images")
-        .where("category", "==", categoryToDelete)
-        .get();
+      const batch = db.batch();
+      const portfoliosSnapshot = await db.collection("portfolios").get();
 
-      if (!imagesWithCategory.empty) {
-        const batch = db.batch();
-        imagesWithCategory.forEach((doc) => {
+      let imagesUpdated = 0;
+
+      for (const portfolioDoc of portfoliosSnapshot.docs) {
+        const imagesSnapshot = await db
+          .collection("portfolios")
+          .doc(portfolioDoc.id)
+          .collection("images")
+          .where("category", "==", categoryToDelete)
+          .get();
+
+        imagesSnapshot.forEach((doc) => {
           batch.update(doc.ref, { category: "" });
+          imagesUpdated++;
         });
+      }
+
+      if (imagesUpdated > 0) {
         await batch.commit();
       }
 
@@ -293,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await loadImageCategories();
 
       showNotification(
-        `Deleted category "${categoryToDelete}" and updated ${imagesWithCategory.size} image(s)`,
+        `Deleted category "${categoryToDelete}" and updated ${imagesUpdated} image(s)`,
         "success"
       );
 
@@ -309,31 +315,63 @@ document.addEventListener("DOMContentLoaded", () => {
     showLoadingState();
 
     try {
-      let query = db.collection("images").orderBy("timestamp", "desc");
+      currentImages = [];
+      imageGrid.innerHTML = "";
 
-      if (portfolioName && portfolioName !== "all") {
-        query = query.where("portfolioName", "==", portfolioName);
+      if (portfolioName === "all") {
+        // Load images from all portfolios
+        const portfoliosSnapshot = await db.collection("portfolios").get();
+
+        for (const portfolioDoc of portfoliosSnapshot.docs) {
+          const imagesSnapshot = await db
+            .collection("portfolios")
+            .doc(portfolioDoc.id)
+            .collection("images")
+            .orderBy("timestamp", "desc")
+            .get();
+
+          imagesSnapshot.forEach((doc) => {
+            const image = {
+              id: doc.id,
+              ...doc.data(),
+              portfolioName: portfolioDoc.id,
+            };
+            currentImages.push(image);
+          });
+        }
+      } else {
+        // Load images from specific portfolio
+        const imagesSnapshot = await db
+          .collection("portfolios")
+          .doc(portfolioName)
+          .collection("images")
+          .orderBy("timestamp", "desc")
+          .get();
+
+        imagesSnapshot.forEach((doc) => {
+          const image = {
+            id: doc.id,
+            ...doc.data(),
+            portfolioName: portfolioName,
+          };
+          currentImages.push(image);
+        });
       }
 
-      const snapshot = await query.get();
       hideLoadingState();
 
-      if (snapshot.empty) {
+      if (currentImages.length === 0) {
         showEmptyState();
         totalImagesSpan.textContent = 0;
         return;
       }
 
-      currentImages = [];
-      imageGrid.innerHTML = "";
+      // Sort all images by timestamp (newest first)
+      currentImages.sort((a, b) => b.timestamp?.seconds - a.timestamp?.seconds);
 
-      snapshot.docs.forEach((doc) => {
-        const image = { id: doc.id, ...doc.data() };
-        currentImages.push(image);
-        renderImageCard(image);
-      });
-
-      totalImagesSpan.textContent = snapshot.size;
+      // Render all images
+      currentImages.forEach((image) => renderImageCard(image));
+      totalImagesSpan.textContent = currentImages.length;
     } catch (error) {
       console.error("Error loading images:", error);
       showErrorState();
@@ -459,19 +497,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Check if portfolio already exists
-      const existingPortfolio = await db
-        .collection("portfolios")
-        .where("name", "==", newPortfolioName)
-        .get();
+      const docRef = db.collection("portfolios").doc(newPortfolioName);
+      const doc = await docRef.get();
 
-      if (!existingPortfolio.empty) {
+      if (doc.exists) {
         showNotification("Portfolio name already exists", "warning");
         return;
       }
 
       // Create new portfolio
-      await db.collection("portfolios").add({
-        name: newPortfolioName,
+      await docRef.set({
+        description: "",
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
 
@@ -491,7 +527,6 @@ document.addEventListener("DOMContentLoaded", () => {
       imageUrl,
       category,
       description,
-      portfolioName,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
@@ -499,11 +534,73 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       if (editingImageId) {
         // Update existing image
-        await db.collection("images").doc(editingImageId).update(imageData);
+        // Find which portfolio the image belongs to
+        let foundPortfolio = null;
+        const portfoliosSnapshot = await db.collection("portfolios").get();
+
+        for (const portfolioDoc of portfoliosSnapshot.docs) {
+          const imageDoc = await db
+            .collection("portfolios")
+            .doc(portfolioDoc.id)
+            .collection("images")
+            .doc(editingImageId)
+            .get();
+
+          if (imageDoc.exists) {
+            foundPortfolio = portfolioDoc.id;
+            break;
+          }
+        }
+
+        if (!foundPortfolio) {
+          throw new Error("Image not found in any portfolio");
+        }
+
+        // If portfolio hasn't changed, update in place
+        if (foundPortfolio === portfolioName) {
+          await db
+            .collection("portfolios")
+            .doc(portfolioName)
+            .collection("images")
+            .doc(editingImageId)
+            .update(imageData);
+        } else {
+          // If portfolio has changed, we need to move the image
+          const imageDoc = await db
+            .collection("portfolios")
+            .doc(foundPortfolio)
+            .collection("images")
+            .doc(editingImageId)
+            .get();
+
+          // Add to new portfolio
+          await db
+            .collection("portfolios")
+            .doc(portfolioName)
+            .collection("images")
+            .doc(editingImageId)
+            .set(imageDoc.data());
+
+          // Delete from old portfolio
+          await db
+            .collection("portfolios")
+            .doc(foundPortfolio)
+            .collection("images")
+            .doc(editingImageId)
+            .delete();
+        }
+
         showNotification("Image updated successfully", "success");
       } else {
-        // Create new image
-        await db.collection("images").add(imageData);
+        // Create new image - generate a new ID
+        const newImageRef = db
+          .collection("portfolios")
+          .doc(portfolioName)
+          .collection("images")
+          .doc();
+
+        await newImageRef.set(imageData);
+        editingImageId = newImageRef.id; // Set the new ID for potential further edits
         showNotification("Image saved successfully", "success");
       }
 
@@ -528,18 +625,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       // Check if portfolio already exists
-      const existingPortfolio = await db
-        .collection("portfolios")
-        .where("name", "==", name)
-        .get();
+      const docRef = db.collection("portfolios").doc(name);
+      const doc = await docRef.get();
 
-      if (!existingPortfolio.empty) {
+      if (doc.exists) {
         showNotification("Portfolio name already exists", "warning");
         return;
       }
 
-      await db.collection("portfolios").add({
-        name,
+      // Create portfolio with name as document ID
+      await docRef.set({
         description,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
@@ -573,21 +668,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // First find the portfolio document to delete
-      const portfolioQuery = await db
-        .collection("portfolios")
-        .where("name", "==", portfolioName)
-        .get();
-
-      if (portfolioQuery.empty) {
-        showNotification("Portfolio not found in database", "error");
-        return;
-      }
-
-      // Delete all images in this portfolio
+      // First delete all images in this portfolio
       const imagesSnapshot = await db
+        .collection("portfolios")
+        .doc(portfolioName)
         .collection("images")
-        .where("portfolioName", "==", portfolioName)
         .get();
 
       if (!imagesSnapshot.empty) {
@@ -599,7 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Then delete the portfolio document
-      await db.collection("portfolios").doc(portfolioQuery.docs[0].id).delete();
+      await db.collection("portfolios").doc(portfolioName).delete();
 
       showNotification(
         `Deleted "${portfolioName}" and ${imagesSnapshot.size} image(s)`,
@@ -634,9 +719,20 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const batch = db.batch();
 
-      selectedImages.forEach((id) => {
-        batch.delete(db.collection("images").doc(id));
-      });
+      // We need to find which portfolio each image belongs to
+      const portfoliosSnapshot = await db.collection("portfolios").get();
+
+      for (const portfolioDoc of portfoliosSnapshot.docs) {
+        for (const imageId of selectedImages) {
+          const imageRef = db
+            .collection("portfolios")
+            .doc(portfolioDoc.id)
+            .collection("images")
+            .doc(imageId);
+
+          batch.delete(imageRef);
+        }
+      }
 
       await batch.commit();
 
@@ -683,21 +779,39 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load image data for reuse
   async function loadImageDataForReuse(imageId) {
     try {
-      const doc = await db.collection("images").doc(imageId).get();
-      if (!doc.exists) {
+      // Find which portfolio contains this image
+      let imageData = null;
+      let foundPortfolio = null;
+
+      const portfoliosSnapshot = await db.collection("portfolios").get();
+
+      for (const portfolioDoc of portfoliosSnapshot.docs) {
+        const doc = await db
+          .collection("portfolios")
+          .doc(portfolioDoc.id)
+          .collection("images")
+          .doc(imageId)
+          .get();
+
+        if (doc.exists) {
+          imageData = doc.data();
+          foundPortfolio = portfolioDoc.id;
+          break;
+        }
+      }
+
+      if (!imageData) {
         showNotification("Image not found", "error");
         return;
       }
 
-      const image = doc.data();
-
       // Populate the form with the image data
-      imagePortfolioSelect.value = image.portfolioName || "";
+      imagePortfolioSelect.value = foundPortfolio || "";
       newPortfolioGroup.style.display = "none";
-      imageTitleInput.value = image.title;
+      imageTitleInput.value = imageData.title;
       imageUrlInput.value = ""; // Clear URL so you can enter a new one
-      imageCategorySelect.value = image.category || "";
-      imageDescriptionInput.value = image.description || "";
+      imageCategorySelect.value = imageData.category || "";
+      imageDescriptionInput.value = imageData.description || "";
 
       // Keep the form in "create new" mode
       editingImageId = null;
@@ -718,27 +832,46 @@ document.addEventListener("DOMContentLoaded", () => {
   // Edit an image
   async function editImage(id) {
     try {
-      const doc = await db.collection("images").doc(id).get();
-      if (!doc.exists) {
+      // Find which portfolio contains this image
+      let imageData = null;
+      let foundPortfolio = null;
+
+      const portfoliosSnapshot = await db.collection("portfolios").get();
+
+      for (const portfolioDoc of portfoliosSnapshot.docs) {
+        const doc = await db
+          .collection("portfolios")
+          .doc(portfolioDoc.id)
+          .collection("images")
+          .doc(id)
+          .get();
+
+        if (doc.exists) {
+          imageData = doc.data();
+          foundPortfolio = portfolioDoc.id;
+          break;
+        }
+      }
+
+      if (!imageData) {
         showNotification("Image not found", "error");
         return;
       }
 
-      const image = { id: doc.id, ...doc.data() };
       editingImageId = id;
 
-      imagePortfolioSelect.value = image.portfolioName || "";
+      imagePortfolioSelect.value = foundPortfolio || "";
       newPortfolioGroup.style.display = "none";
-      imageTitleInput.value = image.title;
-      imageUrlInput.value = image.imageUrl;
-      imageCategorySelect.value = image.category || "";
-      imageDescriptionInput.value = image.description || "";
+      imageTitleInput.value = imageData.title;
+      imageUrlInput.value = imageData.imageUrl;
+      imageCategorySelect.value = imageData.category || "";
+      imageDescriptionInput.value = imageData.description || "";
 
       saveImageBtn.style.display = "none";
       editImageBtn.style.display = "inline-block";
       cancelEditBtn.style.display = "inline-block";
 
-      showNotification("Editing image: " + image.title, "info");
+      showNotification("Editing image: " + imageData.title, "info");
     } catch (error) {
       console.error("Error fetching image for edit:", error);
       showNotification("Error loading image for edit", "error");
@@ -758,7 +891,36 @@ document.addEventListener("DOMContentLoaded", () => {
   // Delete a single image
   async function deleteImage(id) {
     try {
-      await db.collection("images").doc(id).delete();
+      // Find which portfolio contains this image
+      let foundPortfolio = null;
+
+      const portfoliosSnapshot = await db.collection("portfolios").get();
+
+      for (const portfolioDoc of portfoliosSnapshot.docs) {
+        const doc = await db
+          .collection("portfolios")
+          .doc(portfolioDoc.id)
+          .collection("images")
+          .doc(id)
+          .get();
+
+        if (doc.exists) {
+          foundPortfolio = portfolioDoc.id;
+          break;
+        }
+      }
+
+      if (!foundPortfolio) {
+        throw new Error("Image not found in any portfolio");
+      }
+
+      await db
+        .collection("portfolios")
+        .doc(foundPortfolio)
+        .collection("images")
+        .doc(id)
+        .delete();
+
       showNotification("Image deleted successfully", "success");
       loadImages(portfolioFilterSelect.value);
       loadAllCounts();
@@ -796,8 +958,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const portfolioSnapshot = await db.collection("portfolios").get();
       totalPortfoliosSpan.textContent = portfolioSnapshot.size;
 
-      const imageSnapshot = await db.collection("images").get();
-      totalImagesSpan.textContent = imageSnapshot.size;
+      let totalImages = 0;
+      const portfoliosSnapshot = await db.collection("portfolios").get();
+
+      for (const portfolioDoc of portfoliosSnapshot.docs) {
+        const imagesSnapshot = await db
+          .collection("portfolios")
+          .doc(portfolioDoc.id)
+          .collection("images")
+          .get();
+
+        totalImages += imagesSnapshot.size;
+      }
+
+      totalImagesSpan.textContent = totalImages;
     } catch (error) {
       console.error("Error loading counts:", error);
     }
