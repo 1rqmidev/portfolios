@@ -1,28 +1,57 @@
-.gallery {
-  border-radius: var(--radius);
-  border: 2px solid rgba(255, 255, 255, 0.07);
-  padding: var(--padding);
-  margin: var(--padding) 0;
+.loading-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: max-content;
-  overflow: hidden;
+  height: 100%;
+  z-index: 9999;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   justify-content: center;
-  gap: var(--gap);
+  align-items: center;
 }
-.gallery .image {
-  display: flex;
-  position: relative;
-  flex: 1 1 33%;
 
-  min-width: 250px;
-  max-width: 100%;
+.loading-indicator .spinner {
+  border: 5px solid #ddd;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
 }
-@media (min-width: 700px) {
-  .gallery .image {
-    max-width: 50%;
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
+}
+
+.gallery-wrapper {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.gallery-left,
+.gallery-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.image h3 {
+  position: absolute; /* as you mentioned */
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+@media (min-width: 700px) {
 }
 .design-portfolio {
   height: 50vh;
@@ -51,16 +80,11 @@
 }
 .gallery .image {
 }
-.gallery .image:hover img {
-}
-
-.gallery img {
-  width: 100%;
-  margin-bottom: 5px;
-  display: block;
-  height: auto;
+.gallery .image img {
   border-radius: var(--radius);
-  overflow: hidden;
+  object-fit: contain;
+  width: 100%;
+  height: auto;
 }
 
 .gallery .image h3 {

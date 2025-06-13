@@ -1,0 +1,216 @@
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(180deg, #1e293b, #0f172a);
+  color: white;
+  transition: all 0.3s ease;
+  position: fixed;
+  height: 100vh;
+  z-index: 100;
+  transform: translateX(-100%);
+}
+
+.sidebar.active {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-header h2 {
+  color: white;
+  font-size: 1.4rem;
+  background: linear-gradient(90deg, #8b5cf6, #4361ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidebar-menu {
+  padding: 1rem 0;
+  overflow-y: auto;
+  height: calc(100vh - 80px);
+}
+
+.menu-item {
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background: rgba(67, 97, 238, 0.2);
+  color: white;
+}
+
+.menu-item i {
+  margin-right: 12px;
+  width: 20px;
+  text-align: center;
+  color: #8b5cf6;
+}
+
+/* Topbar */
+.topbar {
+  padding: 1rem 1.5rem;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--dark);
+  cursor: pointer;
+  display: none;
+}
+
+.search-bar {
+  position: relative;
+  width: 300px;
+  max-width: 100%;
+  transition: all 0.3s ease;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 3rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  outline: none;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  background-color: #f8fafc;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.search-bar input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+  background-color: white;
+}
+
+.search-bar i {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray);
+  transition: all 0.3s ease;
+}
+
+.search-bar input:focus + i {
+  color: var(--primary);
+}
+
+.search-clear {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--gray);
+  cursor: pointer;
+  display: none;
+}
+
+.search-bar input:not(:placeholder-shown) + i + .search-clear {
+  display: block;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 1rem;
+  font-weight: 500;
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Add to your existing CSS */
+.sidebar-menu .logout-btn {
+  margin-top: auto; /* Pushes to bottom */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ef4444; /* Red color for logout */
+}
+
+.sidebar-menu .logout-btn i {
+  color: #ef4444; /* Match icon color */
+}
+
+.sidebar-menu .logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fff;
+}
+
+/* Responsive Breakpoints */
+@media (min-width: 992px) {
+  .sidebar {
+    transform: translateX(0);
+  }
+
+  .main {
+    margin-left: 260px;
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 991px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .search-bar {
+    width: auto;
+    flex: 1;
+    margin: 0 1rem;
+  }
+}

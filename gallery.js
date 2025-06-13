@@ -55,9 +55,13 @@ async function loadPortfolio() {
     let currentPage = getCurrentPortfolioName();
     // Remove this line as it overrides the detected portfolio name
     // currentPage = "mc-build-portfolio";
-
+    const loading = document.createElement("div");
+    loading.className = "loading-indicator";
+    loading.innerHTML = `<div class="spinner"></div><p>Loading portfolio...</p>`;
+    document.body.appendChild(loading);
     if (!currentPage) {
       console.warn("No portfolio name found in URL path");
+      loading.remove();
       return;
     }
 
@@ -135,10 +139,16 @@ async function loadPortfolio() {
       categoryHeading.classList.add("heading-category");
       section.appendChild(categoryHeading);
 
-      const gallery = document.createElement("div");
-      gallery.className = "gallery";
+      const galleryWrapper = document.createElement("div");
+      galleryWrapper.className = "gallery-wrapper";
 
-      images.forEach((image) => {
+      const galleryLeft = document.createElement("div");
+      galleryLeft.className = "gallery gallery-left";
+
+      const galleryRight = document.createElement("div");
+      galleryRight.className = "gallery gallery-right";
+
+      function createImageItem(image) {
         const item = document.createElement("div");
         item.className = "image";
         item.setAttribute("data-date", image.date);
@@ -148,20 +158,78 @@ async function loadPortfolio() {
           : "";
 
         item.innerHTML = `
-        ${newBadge}
-          <h3>${image.title}</h3>
-          <img loading="lazy" src="${image.url}" alt="${image.title}" />
-        `;
-        gallery.appendChild(item);
+    ${newBadge}
+    <h3>${image.title}</h3>
+    <img  src="${image.url}" alt="${image.title}" />
+  `;
+
+        return item;
+      }
+
+      const imageItems = [];
+      for (const image of images) {
+        await new Promise((resolve) => {
+          const tempImg = new Image();
+          tempImg.onload = () => {
+            imageItems.push({
+              image,
+              width: tempImg.naturalWidth,
+              height: tempImg.naturalHeight,
+            });
+            resolve();
+          };
+          tempImg.onerror = () => {
+            imageItems.push({
+              image,
+              width: 800, // fallback dimensions
+              height: 600,
+            });
+            resolve();
+          };
+          tempImg.src = image.url;
+        });
+      }
+
+      // Calculate column width (48% of gallery-wrapper's 90% width)
+      const columnWidth = window.innerWidth * 0.9 * 0.48;
+
+      // Calculate total height for each item (image + title + badge + margin)
+      const itemHeights = imageItems.map((item) => {
+        // Calculate rendered image height based on column width
+        const renderedHeight = (item.height * columnWidth) / item.width;
+        // Add 20px margin for each item
+        return renderedHeight + 20;
       });
 
-      section.appendChild(gallery);
+      // Sort by descending height for better distribution
+      const sortedItems = imageItems
+        .map((item, index) => ({ item, height: itemHeights[index] }))
+        .sort((a, b) => b.height - a.height);
+
+      let leftHeight = 0;
+      let rightHeight = 0;
+
+      for (const { item, height } of sortedItems) {
+        if (leftHeight <= rightHeight) {
+          galleryLeft.appendChild(createImageItem(item.image));
+          leftHeight += height;
+        } else {
+          galleryRight.appendChild(createImageItem(item.image));
+          rightHeight += height;
+        }
+      }
+
+      galleryWrapper.appendChild(galleryLeft);
+      galleryWrapper.appendChild(galleryRight);
+      section.appendChild(galleryWrapper);
     }
 
     // Insert before footer or at end of body
     const footer = document.querySelector("footer");
     (footer?.parentNode || document.body).insertBefore(section, footer || null);
+    loading.remove();
   } catch (error) {
+    loading.remove();
     console.error("Error loading portfolio:", error);
     const errorDiv = document.createElement("div");
     errorDiv.textContent = "Failed to load portfolio. Please try again later.";

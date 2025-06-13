@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1RqMi Admin Panel</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="general.css" />
+    <link rel="stylesheet" href="login.css" />
+    <link rel="stylesheet" href="sidebar_topbar.css" />
+    <link rel="stylesheet" href="tabs.css" />
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="reviews.css" />
+    <link rel="stylesheet" href="status.css" />
+    <link rel="stylesheet" href="social.css" />
+    <link rel="stylesheet" href="products.css" />
+
+    <link rel="stylesheet" href="images.css" />
+  </head>
+  <body>
+    <div class="login">
+      <div class="logo">
+        <i class="fas fa-cube"></i>
+      </div>
+      <h2>1RqMi Admin Panel</h2>
+      <div class="login-card">
+        <p>Sign in to manage your content</p>
+        <button class="login-btn" onclick="loginWithGoogle()">
+          <i class="fab fa-google"></i> Login with Google
+        </button>
+      </div>
+      <button
+        onclick="logout()"
+        style="
+          display: none;
+          margin-top: 20px;
+          background: transparent;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          padding: 10px 20px;
+          border-radius: 50px;
+        "
+        id="logoutBtn"
+      >
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+
+    <div class="webpage">
+      <div class="sidebar-overlay"></div>
+
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h2>1RqMi Admin</h2>
+          <button class="menu-toggle close-sidebar">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <nav class="sidebar-menu">
+          <a href="#" class="menu-item active" data-tab="dashboard">
+            <i class="fas fa-home"></i>
+            Dashboard
+          </a>
+          <a href="#" class="menu-item" data-tab="reviews">
+            <i class="fas fa-star"></i>
+            Reviews
+          </a>
+          <a href="#" class="menu-item" data-tab="status">
+            <i class="fas fa-info-circle"></i>
+            Status
+          </a>
+          <a href="#" class="menu-item" data-tab="social">
+            <i class="fas fa-share-alt"></i>
+            Social Media
+          </a>
+          <a href="#" class="menu-item" data-tab="products">
+            <i class="fas fa-shopping-bag"></i>
+            Products
+          </a>
+          <a href="#" class="menu-item" data-tab="images">
+            <i class="fas fa-images"></i>
+            Image Library
+          </a>
+
+          <a href="#" class="menu-item logout-btn" id="sidebarLogoutBtn">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+          </a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <button class="menu-toggle open-sidebar">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="search-bar">
+            <input type="text" placeholder="Search..." id="globalSearch" />
+            <i class="fas fa-search"></i>
+            <button class="search-clear" id="clearSearch">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="user-menu">
+            <span class="user-name" id="userName">Admin User</span>
+            <div class="user-avatar" id="userAvatar">AU</div>
+          </div>
+        </header>
+
+        <div class="content">
+          <div class="tab-content active" id="dashboard-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-home"></i>
+                Dashboard
+              </h1>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-tachometer-alt"></i>
+                  Overview
+                </h3>
+              </div>
+
+              <div class="grid-2">
+                <div
+                  class="card"
+                  style="
+                    background: linear-gradient(135deg, #4361ee, #8b5cf6);
+                    color: white;
+                  "
+                >
+                  <h3><i class="fas fa-star"></i> Reviews</h3>
+                  <p style="font-size: 2.5rem; margin: 1rem 0" id="reviewCount">
+                    0
+                  </p>
+                  <p>Manage customer feedback</p>
+                </div>
+
+                <div
+                  class="card"
+                  style="
+                    background: linear-gradient(135deg, #10b981, #059669);
+                    color: white;
+                  "
+                >
+                  <h3><i class="fas fa-shopping-bag"></i> Products</h3>
+                  <p
+                    style="font-size: 2.5rem; margin: 1rem 0"
+                    id="productCount"
+                  >
+                    0
+                  </p>
+                  <p>Manage your offerings</p>
+                </div>
+
+                <div
+                  class="card"
+                  style="
+                    background: linear-gradient(135deg, #f59e0b, #d97706);
+                    color: white;
+                  "
+                >
+                  <h3><i class="fas fa-image"></i> Images</h3>
+                  <p style="font-size: 2.5rem; margin: 1rem 0" id="imageCount">
+                    0
+                  </p>
+                  <p>Manage your media library</p>
+                </div>
+
+                <div
+                  class="card"
+                  style="
+                    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                    color: white;
+                  "
+                >
+                  <h3><i class="fas fa-users"></i> Social Media</h3>
+                  <p style="font-size: 2.5rem; margin: 1rem 0" id="socialCount">
+                    0
+                  </p>
+                  <p>Manage your social presence</p>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-sync-alt"></i> Recent Activity
+                </h3>
+              </div>
+              <div class="recent-reviews" id="recentReviews"></div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="reviews-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-star"></i> Manage Reviews
+              </h1>
+              <button class="btn btn-primary" id="addReviewBtn">
+                <i class="fas fa-plus"></i> Add Review
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-plus-circle"></i> Add New Review
+                </h3>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="reviewName"
+                    placeholder="Reviewer name"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Service</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="reviewService"
+                    placeholder="Service provided"
+                  />
+                </div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Date</label>
+                  <input type="date" class="form-control" id="reviewDate" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Stars (1-5)</label>
+                  <select class="form-control" id="reviewStars">
+                    <option value="5">★★★★★</option>
+                    <option value="4">★★★★☆</option>
+                    <option value="3">★★★☆☆</option>
+                    <option value="2">★★☆☆☆</option>
+                    <option value="1">★☆☆☆☆</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Review Description</label>
+                <textarea
+                  class="form-control"
+                  id="reviewDescription"
+                  placeholder="Review content"
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Image URL</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="reviewImage"
+                  placeholder="Image URL for reviewer"
+                />
+              </div>
+              <button class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Review
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-list"></i> Existing Reviews
+                </h3>
+              </div>
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Service</th>
+                      <th>Stars</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reviewsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="status-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-info-circle"></i> Profile Information
+              </h1>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-pencil-alt"></i> Edit Profile
+                </h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Avatar URL</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="avatarInput"
+                    placeholder="Enter image URL for your avatar"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Current Status</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="statusInput"
+                    placeholder="What's your status?"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Description</label>
+                  <textarea
+                    class="form-control"
+                    id="descriptionInput"
+                    rows="3"
+                    placeholder="Tell something about yourself"
+                  ></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Age</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="ageInput"
+                    placeholder="Your age"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hobbies</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="hobbiesInput"
+                    placeholder="Your hobbies/interests"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Studying</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="studyingInput"
+                    placeholder="What are you studying?"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Located</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="locatedInput"
+                    placeholder="Where are you located?"
+                  />
+                </div>
+                <button class="btn btn-primary" onclick="saveProfile()">
+                  <i class="fas fa-save"></i> Update Profile
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="social-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-share-alt"></i> Social Media Links
+              </h1>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-link"></i> Manage Social Profiles
+                </h3>
+                <button id="addSocialBtn" class="btn btn-success btn-sm">
+                  <i class="fas fa-plus"></i> Add New Link
+                </button>
+              </div>
+              <div class="card-body">
+                <div id="socialLinksContainer" class="row"></div>
+                <div
+                  id="socialFormContainer"
+                  class="mt-4"
+                  style="display: none"
+                >
+                  <div class="form-group">
+                    <label class="form-label">Platform Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="socialPlatformName"
+                      placeholder="e.g. Twitter, GitHub"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Profile URL</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="socialProfileUrl"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Icon URL (optional)</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="socialIconUrl"
+                      placeholder="https://.../icon.png"
+                    />
+                    <small class="text-muted"
+                      >Leave blank to use default platform icon</small
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CSS Class (optional)</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="socialCssClass"
+                      placeholder="custom-class"
+                    />
+                    <small class="text-muted"
+                      >For custom styling of this link</small
+                    >
+                  </div>
+                  <button id="saveSocialBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Link
+                  </button>
+                  <button id="cancelSocialBtn" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                  </button>
+                  <input type="hidden" id="socialEditId" value="" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="products-tab">
+            <div class="content-header">
+              <h1 class="page-title">
+                <i class="fas fa-shopping-bag"></i> Product Management
+              </h1>
+              <button class="btn btn-primary" id="addProductBtn">
+                <i class="fas fa-plus"></i> Add Product
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-cube"></i> Add New Product
+                </h3>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Product Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="productTitle"
+                    placeholder="Product name"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Price ($)</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="productPrice"
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea
+                  class="form-control"
+                  id="productDescription"
+                  placeholder="Product description"
+                ></textarea>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Preview Type</label>
+                  <select class="form-control" id="productPreviewType">
+                    <option value="3D">3D</option>
+                    <option value="Images">Images</option>
+                    <option value="Images & 3D">Images & 3D</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Game Type</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="productGameType"
+                    placeholder="Game genre or type"
+                  />
+                </div>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Initial Views</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="productViews"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Initial Purchases</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="productPurchases"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Product Link</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="productLink"
+                  placeholder="URL to product page"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Image URLs (one per line)</label>
+                <textarea
+                  class="form-control"
+                  id="productImages"
+                  placeholder="https://example.com/image1.jpg https://example.com/image2.jpg"
+                ></textarea>
+              </div>
+              <div class="form-group form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="productStatus"
+                  checked
+                />
+                <label class="form-check-label" for="productStatus"
+                  >Visible to users</label
+                >
+              </div>
+              <button class="btn btn-primary" onclick="saveProduct()">
+                <i class="fas fa-save"></i> Save Product
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-boxes"></i> Existing Products
+                </h3>
+              </div>
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Price</th>
+                      <th>Preview</th>
+                      <th>Game Type</th>
+                      <th>Views</th>
+                      <th>Purchases</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="productsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="images-tab">
+            <div class="image-library-container">
+              <!-- Left Control Panel -->
+              <div class="control-panel">
+                <!-- Stats Cards -->
+                <div class="card">
+                  <div class="card-body">
+                    <div class="stats-container">
+                      <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                          <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="stat-info">
+                          <span class="stat-value" id="totalPortfolios">0</span>
+                          <span class="stat-label">Portfolios</span>
+                        </div>
+                      </div>
+                      <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                          <i class="fas fa-image"></i>
+                        </div>
+                        <div class="stat-info">
+                          <span class="stat-value" id="totalImages">0</span>
+                          <span class="stat-label">Images</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="header-actions flex-wrap">
+                      <button class="btn btn-primary" id="createPortfolioBtn">
+                        <i class="fas fa-plus"></i> Create Portfolio
+                      </button>
+                      <button class="btn btn-danger" id="deletePortfolioBtn">
+                        <i class="fas fa-trash-alt"></i> Delete Portfolio
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Upload Panel -->
+                <div class="card upload-panel">
+                  <div class="card-header">
+                    <h3>
+                      <i class="fas fa-cloud-upload-alt"></i> Upload & Manage
+                    </h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="form-group">
+                      <label class="form-label">Portfolio</label>
+                      <select class="form-control" id="imagePortfolio">
+                        <option value="">Loading portfolios...</option>
+                      </select>
+                    </div>
+
+                    <div
+                      class="form-group"
+                      id="newPortfolioGroup"
+                      style="display: none"
+                    >
+                      <label class="form-label">New Portfolio Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="newPortfolioName"
+                        placeholder="e.g., Web Design"
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Image URL</label>
+                      <div class="input-group">
+                        <input
+                          type="text"
+                          id="imageUrl"
+                          class="form-control"
+                          placeholder="https://example.com/image.jpg"
+                        />
+                        <div class="input-group-append">
+                          <button
+                            class="btn btn-outline-secondary"
+                            id="loadImageDataBtn"
+                            title="Load image data"
+                          >
+                            <i class="fas fa-download"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Title</label>
+                      <input
+                        type="text"
+                        id="imageTitle"
+                        class="form-control"
+                        placeholder="Image title"
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Category</label>
+                      <select id="imageCategory" class="form-control">
+                        <option value="">Select category</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Description</label>
+                      <textarea
+                        id="imageDescription"
+                        class="form-control"
+                        rows="2"
+                        placeholder="Optional description"
+                      ></textarea>
+                    </div>
+
+                    <div class="btn-group">
+                      <button class="btn btn-primary" id="saveImageBtn">
+                        <i class="fas fa-save"></i> Save Image
+                      </button>
+                      <button
+                        class="btn btn-secondary"
+                        id="editImageBtn"
+                        style="display: none"
+                      >
+                        <i class="fas fa-edit"></i> Update
+                      </button>
+                      <button
+                        class="btn btn-outline-secondary"
+                        id="cancelEditBtn"
+                        style="display: none"
+                      >
+                        <i class="fas fa-times"></i> Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Category Management Panel -->
+                <div class="card category-panel">
+                  <div class="card-header">
+                    <h3><i class="fas fa-tags"></i> Category Management</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="form-group">
+                      <label class="form-label">Add New Category</label>
+                      <div class="input-group">
+                        <input
+                          type="text"
+                          id="newCategoryName"
+                          class="form-control"
+                          placeholder="New category name"
+                        />
+                        <div class="input-group-append">
+                          <button class="btn btn-success" id="addCategoryBtn">
+                            <i class="fas fa-plus"></i> Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label"
+                        >Manage Existing Categories</label
+                      >
+                      <div class="input-group">
+                        <select id="editCategorySelect" class="form-control">
+                          <option value="">Select category</option>
+                        </select>
+                        <div class="input-group-append">
+                          <button class="btn btn-danger" id="deleteCategoryBtn">
+                            <i class="fas fa-trash"></i> Delete
+                          </button>
+                        </div>
+                      </div>
+                      <small class="text-muted"
+                        >Deleting a category will remove all images in that
+                        category</small
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Gallery Panel -->
+              <div class="gallery-panel">
+                <div class="card">
+                  <div class="card-header">
+                    <h3><i class="fas fa-th"></i> Image Gallery</h3>
+                    <div class="filter-controls">
+                      <div class="filter-group">
+                        <select class="form-control" id="portfolioFilter">
+                          <option value="all">All Portfolios</option>
+                        </select>
+                      </div>
+                      <div class="filter-group">
+                        <select class="form-control" id="categoryFilter">
+                          <option value="all">All Categories</option>
+                          <option value="uncategorized">Uncategorized</option>
+                        </select>
+                      </div>
+                      <button
+                        class="btn btn-outline-danger"
+                        id="deleteSelectedBtn"
+                      >
+                        <i class="fas fa-trash"></i> Delete Selected
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="gallery-grid" id="imageGrid">
+                      <div class="loading-placeholder">
+                        <i class="fas fa-spinner fa-spin"></i> Loading images...
+                      </div>
+                      <div class="empty-state" style="display: none">
+                        <i class="fas fa-image"></i> No images found. Upload
+                        some images to get started!
+                      </div>
+                      <div class="error-state" style="display: none">
+                        <i class="fas fa-exclamation-circle"></i> Error loading
+                        images. Please try again.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <!-- Create Portfolio Modal -->
+          <div
+            class="modal fade"
+            id="createPortfolioModal"
+            tabindex="-1"
+            role="dialog"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Create New Portfolio</h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="portfolioName">Portfolio Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="portfolioName"
+                      placeholder="Enter portfolio name"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="portfolioDescription"
+                      >Description (Optional)</label
+                    >
+                    <textarea
+                      class="form-control"
+                      id="portfolioDescription"
+                      rows="3"
+                      placeholder="Brief description of this portfolio"
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="confirmCreatePortfolio"
+                  >
+                    Create Portfolio
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="general.js"></script>
+    <script src="auth.js"></script>
+    <script src="sidebar_topbar.js"></script>
+    <script src="tabs.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="reviews.js"></script>
+    <script src="status.js"></script>
+    <script src="social.js"></script>
+    <script src="products.js"></script>
+    <script src="images.js"></script>
+  </body>
+</html>

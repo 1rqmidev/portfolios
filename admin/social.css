@@ -1,0 +1,10 @@
+.social-link {
+  transition: transform 0.2s;
+}
+.social-link:hover {
+  transform: translateY(-2px);
+}
+.social-icon {
+  margin-right: 8px;
+  border-radius: 4px;
+}
