@@ -62,6 +62,9 @@
   .reviews-section .review-part.review-big {
     width: 100% !important;
   }
+  .reviews-section .review-part.review-big .swiper-slide {
+    padding: var(--padding);
+  }
   .reviews-section .review-part.review-small {
     padding-right: 0;
     width: 100% !important;
@@ -165,6 +168,7 @@
   padding: var(--padding);
   display: flex;
   flex-direction: column;
+  padding-bottom: 45px;
   gap: var(--gap);
 }
 .review-part.review-small .swiper .swiper-slide .review-card {
@@ -196,9 +200,7 @@
   --swiper-pagination-bullet-border-radius: 5px;
   --swiper-pagination-bullet-inactive-color: transparent;
 }
-.review-part.review-big .swiper {
-  padding: var(--padding);
-}
+
 .review-part.review-big .swiper .swiper-slide {
   border-radius: var(--radius);
   overflow: hidden;

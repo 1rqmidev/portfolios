@@ -278,7 +278,7 @@ async function loadSocialLinks() {
       imgElement.src = linkData.iconUrl || "";
       imgElement.alt = `${linkData.platform} icon`;
       imgElement.loading = "lazy"; // Add lazy loading for better performance
-
+      socialElement.classList.add("bg-blur");
       // Make the icon clickable
       const linkElement = document.createElement("a");
       linkElement.href = linkData.url;

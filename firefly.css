@@ -16,6 +16,47 @@
   border-radius: 50%;
   transform-origin: -10vw;
 }
+#ellipse-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ellipse {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  filter: blur(40px);
+  animation: float 20s ease-in-out infinite;
+}
+.bg-blur {
+  backdrop-filter: blur(90px) !important;
+  box-shadow: unset !important;
+  background-color: transparent !important;
+  border: 2px solid var(--prime2);
+  border-bottom: 3px solid var(--prime);
+  border-right: 2px solid var(--prime);
+  background-color: var(--fills) !important;
+  background-image: unset !important;
+}
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+    filter: blur(80px);
+  }
+  50% {
+    transform: translateY(-150px);
+    filter: blur(180px);
+  }
+  100% {
+    transform: translateY(0px);
+    filter: blur(80px);
+  }
+}
 
 .firefly::before {
   background: rgba(255, 255, 255, 0);

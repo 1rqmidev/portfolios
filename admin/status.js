@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Function to save profile data
   async function saveProfile() {
     const profileData = {
-      avatarUrl: avatarInput.value,
+      avatar: avatarInput.value,
       status: statusInput.value,
       description: descriptionInput.value,
       age: parseInt(ageInput.value) || null,
@@ -23,8 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       // Assuming a single document for user profile
       await db
-        .collection("profile")
-        .doc("adminProfile")
+        .collection("settings")
+        .doc("profile")
         .set(profileData, { merge: true });
       showNotification("Profile updated successfully!", "success");
     } catch (error) {
@@ -36,10 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Function to load profile data
   async function loadProfile() {
     try {
-      const doc = await db.collection("profile").doc("adminProfile").get();
+      const doc = await db.collection("settings").doc("profile").get();
       if (doc.exists) {
         const profile = doc.data();
-        avatarInput.value = profile.avatarUrl || "";
+        avatarInput.value = profile.avatar || "";
         statusInput.value = profile.status || "";
         descriptionInput.value = profile.description || "";
         ageInput.value = profile.age || "";
@@ -56,7 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Attach saveProfile to button (already done in HTML with onclick)
-  // document.querySelector("#status-tab .btn-primary").addEventListener("click", saveProfile);
+  document
+    .querySelector("#status-tab .btn-primary")
+    .addEventListener("click", saveProfile);
 
   // Initial load of profile data when the tab is likely to be active or page loads
   loadProfile();

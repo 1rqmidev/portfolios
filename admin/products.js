@@ -164,7 +164,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
-
+  document
+    .querySelector("#products-tab > div:nth-child(2) > button")
+    .addEventListener("click", (e) => {
+      saveProduct();
+    });
   // Delete product
   async function deleteProduct(id) {
     try {

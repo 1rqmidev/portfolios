@@ -282,7 +282,23 @@
   border: 1px solid var(--color-border);
   color: var(--color-mid);
 }
-
+.selected {
+  outline: 3px solid red;
+  position: relative;
+  overflow: hidden;
+  transition: 0s !important;
+}
+.selected::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0.2;
+  z-index: 20;
+  background-color: red;
+  height: 100%;
+}
 .btn-outline:hover {
   background: var(--color-lighter);
   border-color: var(--color-light);

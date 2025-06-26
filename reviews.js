@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     reviews.forEach((review) => {
       const slide = document.createElement("div");
-      slide.classList.add("swiper-slide");
+      slide.classList.add("swiper-slide", "bg-blur");
       slide.innerHTML = `
         <div class="review-card">
           <img src="${review.pfp}" alt="${review.name}" class="pfp" />
